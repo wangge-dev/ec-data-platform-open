@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">现成模块与字段调整</title>
+  <desc id="desc">五张不同业务卡片连接字段调整面板，再连接后续同类报表。仅为功能关系示意。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1l7 4-7 4" fill="none" stroke="#dc6555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      .label{font:700 45px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#333b40}
+      .line{fill:none;stroke:#dc6555;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+      .muted{fill:none;stroke:#b8ada0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#faf7f1"/>
+  <path d="M0 790c310-70 448 28 725-52s504-20 875 55v107H0z" fill="#f3e9da"/>
+  <text x="315" y="145" text-anchor="middle" class="label">现成模块</text>
+  <g stroke="#e3d9cd" stroke-width="3">
+    <rect x="75" y="202" width="200" height="194" rx="27" fill="#fff"/><rect x="300" y="202" width="200" height="194" rx="27" fill="#fff"/>
+    <rect x="75" y="419" width="200" height="194" rx="27" fill="#fff"/><rect x="300" y="419" width="200" height="194" rx="27" fill="#fff"/>
+    <rect x="188" y="636" width="200" height="136" rx="27" fill="#fff"/>
+  </g>
+  <g class="line">
+    <path d="M130 260h90v77h-90zM130 283h90M150 309h45"/>
+    <path d="M342 338l30-40 30 20 48-60M342 351h105"/>
+    <path d="M133 481h87v80h-87zM146 501h60M146 525h43"/>
+    <path d="M344 479h80v83h-80zM356 500h56M356 525h56"/>
+    <path d="M240 675h97v53h-97zM267 675v53M306 675v53"/>
+  </g>
+  <path d="M535 449h82" class="line" marker-end="url(#arrow)"/>
+  <text x="800" y="145" text-anchor="middle" class="label">轻调字段</text>
+  <rect x="650" y="204" width="305" height="493" rx="32" fill="#fff" stroke="#e3d9cd" stroke-width="3"/>
+  <rect x="686" y="255" width="230" height="62" rx="14" fill="#f5e6e0"/>
+  <path d="M704 286h83M819 286h71" class="muted"/>
+  <circle cx="897" cy="286" r="11" fill="#dc6555"/>
+  <rect x="686" y="349" width="230" height="62" rx="14" fill="#f7f4ee"/>
+  <path d="M704 380h74M813 380h75" class="muted"/>
+  <path d="M782 380l16 14 16-14" class="line" stroke-width="4"/>
+  <rect x="686" y="443" width="230" height="62" rx="14" fill="#f7f4ee"/>
+  <path d="M704 474h102M836 474h52" class="muted"/>
+  <circle cx="898" cy="474" r="11" fill="#d5b779"/>
+  <rect x="686" y="537" width="230" height="62" rx="14" fill="#f7f4ee"/>
+  <path d="M704 568h69M807 568h82" class="muted"/>
+  <path d="M976 449h82" class="line" marker-end="url(#arrow)"/>
+  <text x="1300" y="145" text-anchor="middle" class="label">后续复用</text>
+  <rect x="1090" y="239" width="410" height="420" rx="34" fill="#fff" stroke="#e3d9cd" stroke-width="3"/>
+  <g stroke="#d4c9bc" stroke-width="4" fill="#fcfaf6">
+    <path d="M1140 300h118l47 46v208h-165z"/><path d="M1224 331h118l47 46v208h-165z"/>
+  </g>
+  <g stroke="#d4c9bc" stroke-width="4" fill="none"><path d="M1180 388h90M1180 421h90M1180 454h90"/><path d="M1262 420h90M1262 453h90M1262 486h90"/></g>
+  <path d="M1170 610h249" class="muted"/>
+  <circle cx="1440" cy="609" r="24" fill="#dc6555"/>
+  <path d="M1428 609l8 8 16-19" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

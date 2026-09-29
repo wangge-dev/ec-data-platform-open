@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">普通业务表的四步 DIY</title>
+  <desc id="desc">选样表、对字段、选有效状态、查看结果，第二批同类表可复用已确认规则。仅为功能关系示意。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1l7 4-7 4" fill="none" stroke="#dc6555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      .label{font:700 39px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#333b40}
+      .loop{font:700 36px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#333b40}
+      .number{font:700 47px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#dc6555}
+      .ink{fill:none;stroke:#dc6555;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+      .muted{fill:none;stroke:#b8ada0;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#faf7f1"/>
+  <circle cx="93" cy="98" r="116" fill="#f2e5d1" opacity=".55"/>
+  <circle cx="1513" cy="814" r="102" fill="#f4dfd7" opacity=".5"/>
+  <g fill="#fff" stroke="#e4dcd2" stroke-width="3">
+    <rect x="68" y="175" width="330" height="500" rx="31"/>
+    <rect x="446" y="175" width="330" height="500" rx="31"/>
+    <rect x="824" y="175" width="330" height="500" rx="31"/>
+    <rect x="1202" y="175" width="330" height="500" rx="31"/>
+  </g>
+  <text x="104" y="245" class="number">01</text>
+  <text x="482" y="245" class="number">02</text>
+  <text x="860" y="245" class="number">03</text>
+  <text x="1238" y="245" class="number">04</text>
+  <text x="233" y="618" text-anchor="middle" class="label">选样表</text>
+  <text x="611" y="618" text-anchor="middle" class="label">对字段</text>
+  <text x="989" y="618" text-anchor="middle" class="label">选有效状态</text>
+  <text x="1367" y="618" text-anchor="middle" class="label">查看结果</text>
+  <path d="M403 425h32M781 425h32M1159 425h32" class="ink" marker-end="url(#arrow)"/>
+  <path d="M159 330h104l37 37v137H159zM263 330v37h37" fill="#fcfaf6" stroke="#b8ada0" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M183 397h90M183 428h90M183 459h90M214 397v91M245 397v91" class="muted"/>
+  <rect x="510" y="336" width="81" height="58" rx="12" fill="#f5e5e0"/>
+  <rect x="631" y="336" width="81" height="58" rx="12" fill="#f8f2e7"/>
+  <rect x="510" y="438" width="81" height="58" rx="12" fill="#f5e5e0"/>
+  <rect x="631" y="438" width="81" height="58" rx="12" fill="#f8f2e7"/>
+  <path d="M596 366h29M596 468h29" class="ink" marker-end="url(#arrow)"/>
+  <rect x="888" y="339" width="203" height="67" rx="14" fill="#f8f3eb" stroke="#e4dcd2" stroke-width="3"/>
+  <rect x="888" y="434" width="203" height="67" rx="14" fill="#f8f3eb" stroke="#e4dcd2" stroke-width="3"/>
+  <path d="M915 373l14 14 22-28" class="ink"/>
+  <path d="M965 373h91M915 468h28M965 468h91" class="muted"/>
+  <rect x="1269" y="346" width="197" height="152" rx="18" fill="#fcfaf6" stroke="#e4dcd2" stroke-width="3"/>
+  <path d="M1293 466h147M1293 431h147M1293 396h147" class="muted" opacity=".5"/>
+  <path d="M1294 438l41-23 40 17 45-49 22-10" class="ink"/>
+  <path d="M1428 702v55c0 26-20 46-46 46H204c-26 0-46-20-46-46v-55" fill="none" stroke="#d5b779" stroke-width="5" stroke-linecap="round"/>
+  <rect x="579" y="750" width="442" height="104" rx="52" fill="#fff" stroke="#e3d9cd" stroke-width="3"/>
+  <text x="800" y="817" text-anchor="middle" class="loop">第二批同类表复用</text>
+</svg>

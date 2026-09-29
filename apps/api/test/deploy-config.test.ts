@@ -1854,7 +1854,7 @@ Write-Output 'PS51_NATIVE_CAPTURE_OK'
 
   test("provides a clean Git-bundle development handoff with optional database backup", () => {
     const script = readRoot("scripts/package-development-handoff.ps1");
-    const guide = readRoot("README.md");
+    const guide = readRoot("docs/TECHNICAL_OVERVIEW.md");
 
     expect(script).toContain("Invoke-Native git @('-C', $RepoRoot, 'bundle', 'create'");
     expect(script).toContain("'fsck', '--full'");

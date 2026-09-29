@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">从报表到电商工作台</title>
+  <desc id="desc">抽象报表进入五张业务模块卡片，经过规则复用和按需扩展，形成经营观察图表。仅为功能关系示意。</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fcfaf6"/><stop offset="1" stop-color="#f6f1e9"/></linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1l7 4-7 4" fill="none" stroke="#dc6555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      .label{font:700 42px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#333b40}
+      .small{font:700 33px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#333b40}
+      .line{stroke:#d8d2c9;stroke-width:3;stroke-linecap:round}
+      .coral{stroke:#dc6555;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="url(#paper)"/>
+  <circle cx="1480" cy="116" r="110" fill="#f2e5d1" opacity=".5"/>
+  <circle cx="105" cy="785" r="105" fill="#f4dfd7" opacity=".5"/>
+  <rect x="77" y="205" width="300" height="430" rx="32" fill="#fff" stroke="#e6dfd5" stroke-width="3"/>
+  <path d="M113 247h148l67 67v274H113z" fill="#fcfaf6" stroke="#d1c9be" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M261 247v67h67" fill="none" stroke="#d1c9be" stroke-width="4"/>
+  <rect x="140" y="344" width="158" height="34" rx="7" fill="#f5e1dc"/>
+  <path d="M140 395h158M140 435h158M140 475h158M140 515h158M193 344v211M245 344v211" class="line"/>
+  <path d="M394 424h90" class="coral" marker-end="url(#arrow)"/>
+  <rect x="510" y="130" width="560" height="575" rx="38" fill="#fff" stroke="#e6dfd5" stroke-width="3"/>
+  <text x="790" y="202" text-anchor="middle" class="label">电商模块</text>
+  <g fill="#fcfaf6" stroke="#e2d8cc" stroke-width="3">
+    <rect x="552" y="245" width="145" height="170" rx="22"/>
+    <rect x="717" y="245" width="145" height="170" rx="22"/>
+    <rect x="882" y="245" width="145" height="170" rx="22"/>
+    <rect x="634" y="450" width="145" height="170" rx="22"/>
+    <rect x="799" y="450" width="145" height="170" rx="22"/>
+  </g>
+  <g fill="none" stroke="#dc6555" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M587 294h71v77h-71zM587 317h71M602 341h41"/>
+    <path d="M753 356l22-32 23 15 24-47M754 374h73"/>
+    <circle cx="954" cy="325" r="34"/><path d="M954 302v24l15 10"/>
+    <path d="M672 565v-51h68v51zM688 512v-17h36v17"/>
+    <path d="M832 508h70v64h-70zM832 534h70M856 508v64"/>
+  </g>
+  <path d="M1094 424h75" class="coral" marker-end="url(#arrow)"/>
+  <text x="1353" y="202" text-anchor="middle" class="label">经营观察</text>
+  <rect x="1197" y="236" width="314" height="399" rx="32" fill="#fff" stroke="#e6dfd5" stroke-width="3"/>
+  <path d="M1237 534h236M1237 472h236M1237 410h236M1237 348h236" class="line" opacity=".55"/>
+  <g fill="#e8c1b6"><rect x="1254" y="465" width="30" height="69" rx="6"/><rect x="1300" y="420" width="30" height="114" rx="6"/><rect x="1346" y="440" width="30" height="94" rx="6"/><rect x="1392" y="382" width="30" height="152" rx="6"/><rect x="1438" y="352" width="30" height="182" rx="6"/></g>
+  <path d="M1248 406l48-27 49 17 49-55 65-36" fill="none" stroke="#dc6555" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1459" cy="305" r="9" fill="#dc6555"/>
+  <path d="M1000 746c-190 104-392 97-537 7" fill="none" stroke="#d5b779" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <rect x="560" y="739" width="206" height="83" rx="41" fill="#fff" stroke="#e6dfd5" stroke-width="3"/>
+  <text x="663" y="793" text-anchor="middle" class="small">规则复用</text>
+  <rect x="804" y="739" width="212" height="83" rx="41" fill="#fff" stroke="#e6dfd5" stroke-width="3"/>
+  <text x="910" y="793" text-anchor="middle" class="small">DIY 扩展</text>
+</svg>

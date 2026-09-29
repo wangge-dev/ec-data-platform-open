@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">从提醒到图表，再回查原始行</title>
+  <desc id="desc">分析中心提醒、模块指标、经营驾驶舱图表和原始明细形成可回查的观察路径。所有图表都没有经营数字。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1l7 4-7 4" fill="none" stroke="#dc6555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      .label{font:700 36px 'Microsoft YaHei','PingFang SC','Noto Sans CJK SC',sans-serif;fill:#333b40}
+      .ink{fill:none;stroke:#dc6555;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+      .muted{fill:none;stroke:#b9afa3;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="#faf7f1"/>
+  <path d="M0 0h1600v128H0z" fill="#f5eee5"/>
+  <path d="M0 790c330-80 610-20 890 5s515 33 710-28v133H0z" fill="#f5eee5"/>
+  <g fill="#fff" stroke="#e3d9cd" stroke-width="3">
+    <rect x="68" y="238" width="330" height="430" rx="32"/>
+    <rect x="446" y="238" width="330" height="430" rx="32"/>
+    <rect x="824" y="238" width="330" height="430" rx="32"/>
+    <rect x="1202" y="238" width="330" height="430" rx="32"/>
+  </g>
+  <path d="M402 452h32M780 452h32M1158 452h32" class="ink" marker-end="url(#arrow)"/>
+  <text x="233" y="607" text-anchor="middle" class="label">分析中心提醒</text>
+  <text x="611" y="607" text-anchor="middle" class="label">模块指标</text>
+  <text x="989" y="607" text-anchor="middle" class="label">经营驾驶舱图表</text>
+  <text x="1367" y="607" text-anchor="middle" class="label">回到原始明细</text>
+  <rect x="121" y="320" width="224" height="202" rx="22" fill="#fcfaf6" stroke="#eee5db" stroke-width="3"/>
+  <circle cx="176" cy="377" r="22" fill="#f5e2dc"/>
+  <path d="M176 364v17M176 392v2" class="ink" stroke-width="5"/>
+  <path d="M218 372h93M159 438h152M159 478h115" class="muted"/>
+  <rect x="500" y="320" width="224" height="202" rx="22" fill="#fcfaf6" stroke="#eee5db" stroke-width="3"/>
+  <path d="M535 362h144M535 402h114M535 442h135M535 482h98" class="muted"/>
+  <circle cx="675" cy="482" r="14" fill="#dc6555"/>
+  <rect x="877" y="320" width="224" height="202" rx="22" fill="#fcfaf6" stroke="#eee5db" stroke-width="3"/>
+  <path d="M903 484h174M903 448h174M903 412h174M903 376h174" class="muted" opacity=".45"/>
+  <path d="M916 460l39-18 39 12 40-47 42-31" class="ink"/>
+  <rect x="1255" y="320" width="224" height="202" rx="22" fill="#fcfaf6" stroke="#eee5db" stroke-width="3"/>
+  <path d="M1280 367h173M1280 409h173M1280 451h173M1335 343v150M1392 343v150" class="muted"/>
+  <rect x="1282" y="415" width="169" height="31" rx="8" fill="#f5e2dc" opacity=".8"/>
+  <path d="M1370 705c-260 105-613 89-855 2" fill="none" stroke="#d5b779" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+</svg>
