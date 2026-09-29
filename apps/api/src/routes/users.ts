@@ -108,7 +108,19 @@ r.delete("/:id{[0-9]+}", adminGuard, async (c) => {
   const [{ count }] = await db.select({ count: dsql<number>`count(*)::int` }).from(users);
   if (count <= 1) return c.json({ ok: false, message: "至少保留一个用户" }, 400);
 
-  await db.delete(users).where(eq(users.id, id));
+  try {
+    await db.delete(users).where(eq(users.id, id));
+  } catch (error) {
+    const databaseError = error as { code?: string; cause?: { code?: string } } | null;
+    if (databaseError?.code === "23503" || databaseError?.cause?.code === "23503") {
+      return c.json({
+        ok: false,
+        code: "USER_HAS_HISTORY",
+        message: "该用户有业务操作记录，不能删除；可由管理员重置密码使现有登录失效，并保留历史归属",
+      }, 409);
+    }
+    throw error;
+  }
   return c.json({ ok: true });
 });
 

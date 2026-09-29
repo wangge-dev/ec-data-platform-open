@@ -88,11 +88,11 @@ jobs:
           NODE
           pnpm --filter @ec/api exec tsx scripts/migrate.ts
 
-      - name: Run real front-profit advisory-lock integration
+      - name: Run isolated PostgreSQL integration regressions
         env:
           RUN_DB_TESTS: "1"
           TEST_DATABASE_URL: postgres://ec_app:CiAppDb8Qw4Nz6Ty@127.0.0.1:5432/ec_data
-        run: pnpm --filter @ec/api exec vitest run test/front-profit-advisory-lock.integration.test.ts --maxWorkers=1
+        run: pnpm --filter @ec/api exec vitest run test/front-profit-advisory-lock.integration.test.ts test/agent-file-sample.integration.test.ts test/import-excel-wide.integration.test.ts test/users-delete-history.integration.test.ts --maxWorkers=1
 
       - name: Check public repository boundaries
         run: pnpm repo:check:public

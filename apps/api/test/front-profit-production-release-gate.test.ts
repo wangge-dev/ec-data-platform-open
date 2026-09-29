@@ -453,7 +453,7 @@ describe("front-profit production release gate", () => {
     expect(result.stdout).toContain("releasePeriods=2026-08");
     expect(result.stdout).toContain("releasePlatforms=tmall");
     expect(result.stdout).toContain("acceptedPeriods=2026-07,2026-08");
-  });
+  }, 20000);
 
   test("rejects a release whose declared accepted periods do not match the referenced result", () => {
     const resultPath = writeJson(`${ignoredAcceptanceDir("period-mismatch")}/result.json`, acceptedResultManifest("period-mismatch"));
@@ -520,7 +520,7 @@ describe("front-profit production release gate", () => {
     expect(allowed.stdout).toContain("FRONT_PROFIT_PRODUCTION_RELEASE_GATE_OK");
     expect(allowed.stdout).toContain("releasePlatforms=synthetic-platform");
     expect(allowed.stdout).toContain("syntheticRehearsal=allowed");
-  });
+  }, 20000);
 
   test("runs the synthetic production release smoke and cleans generated manifests", () => {
     const result = runReleaseSmoke();

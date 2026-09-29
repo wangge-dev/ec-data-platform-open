@@ -12,7 +12,7 @@ vi.mock("../src/db/client.js", () => ({
   sql: { unsafe: sqlUnsafe, begin: sqlBegin },
 }));
 
-import { importExcel } from "../src/services/import-excel.js";
+import { importExcel, importInsertBatchSize } from "../src/services/import-excel.js";
 
 describe("importExcel malicious workbook boundary", () => {
   test("rejects external XLSX relationships before any database operation", async () => {
@@ -36,5 +36,17 @@ describe("importExcel malicious workbook boundary", () => {
     expect(dbSelect).not.toHaveBeenCalled();
     expect(sqlUnsafe).not.toHaveBeenCalled();
     expect(sqlBegin).not.toHaveBeenCalled();
+  });
+});
+
+describe("import batch parameter budget", () => {
+  test.each([
+    [3, 200],
+    [327, 200],
+    [328, 199],
+    [1024, 63],
+  ])("uses at most PostgreSQL's parameter limit for %i columns", (columns, expected) => {
+    expect(importInsertBatchSize(columns)).toBe(expected);
+    expect(importInsertBatchSize(columns) * columns).toBeLessThanOrEqual(65_535);
   });
 });

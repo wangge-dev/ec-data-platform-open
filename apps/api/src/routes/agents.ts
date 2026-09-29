@@ -10,6 +10,7 @@ import { resolveExistingRuntimeTableReferenceFromSql } from "../db/table-scope";
 import { authMiddleware } from "../lib/auth";
 import { executeLocalReadOnlyQuery } from "../lib/local-readonly-sql";
 import { chat, type ModelTier } from "../services/llm";
+import { readFileAnalysisSample } from "../services/agent-file-sample.js";
 
 const r = new Hono();
 r.use("*", authMiddleware);
@@ -180,8 +181,8 @@ r.post("/:code/run", zValidator("json", runSchema), async (c) => {
     for (const s of targets) {
       const cols = ((s.config as any)?.columns ?? []) as Array<{ raw: string; name: string }>;
       if (!cols.length) continue;
-      const colExpr = cols.map((col) => `"${col.name}" AS "${col.raw}"`).join(", ");
-      const sample = await sql.unsafe(`SELECT ${colExpr} FROM "uf_${s.id}" LIMIT ${perTable}`);
+      const sample = await readFileAnalysisSample(sql, s.id, cols, perTable);
+      if (!sample) continue;
       blocks.push(
         `### 表「${s.name}」（约 ${(s.config as any)?.rowCount ?? "?"} 行，以下为 ${sample.length} 行采样）\n` +
           JSON.stringify(sample, null, 2),

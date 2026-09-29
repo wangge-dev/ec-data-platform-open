@@ -40,6 +40,15 @@ import {
 export const MAX_ROWS_DEFAULT = 50000;
 export const MAX_ROWS_DICT = 100000;
 export const FILE_TABLE_PREFIX = "uf_";
+const MAX_POSTGRES_QUERY_PARAMETERS = 65_535;
+const IMPORT_BATCH_ROWS = 200;
+
+export function importInsertBatchSize(columnCount: number): number {
+  if (!Number.isSafeInteger(columnCount) || columnCount < 1 || columnCount > MAX_POSTGRES_QUERY_PARAMETERS) {
+    throw new Error("Invalid imported column count");
+  }
+  return Math.min(IMPORT_BATCH_ROWS, Math.floor(MAX_POSTGRES_QUERY_PARAMETERS / columnCount));
+}
 
 // 列名规范化：保留中英文数字下划线，其他换 _
 export function normalizeColumnName(raw: string, idx: number): string {
@@ -560,7 +569,7 @@ export async function importExcel(
     await executor.unsafe(`CREATE TABLE IF NOT EXISTS ${tableRef} (id BIGSERIAL PRIMARY KEY, ${colDefs})`);
 
     const colNames = cols.map((c) => `"${c.name}"`).join(", ");
-    const BATCH = 200;
+    const BATCH = importInsertBatchSize(cols.length);
     for (let i = 0; i < dataRows.length; i += BATCH) {
       const slice = dataRows.slice(i, i + BATCH);
       if (!slice.length) continue;
@@ -824,7 +833,7 @@ export async function importWorkbookSheets(
       const colDefs = sheet.columns.map((column) => `"${column.name}" TEXT`).join(", ");
       await tx.unsafe(`CREATE TABLE ${tableRef} (id BIGSERIAL PRIMARY KEY, ${colDefs})`);
       const colNames = sheet.columns.map((column) => `"${column.name}"`).join(", ");
-      const batchSize = 200;
+      const batchSize = importInsertBatchSize(sheet.columns.length);
       for (let offset = 0; offset < sheet.dataRows.length; offset += batchSize) {
         const batch = sheet.dataRows.slice(offset, offset + batchSize);
         const placeholders: string[] = [];
