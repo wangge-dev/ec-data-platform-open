@@ -1,0 +1,65 @@
+{
+  "code": "brand_dict",
+  "name": "品牌维护表",
+  "category": "dict",
+  "categoryLabel": "字典/维护表",
+  "description": "全平台品牌-商品 ID 映射，订单/库存模块的 brand/category/shop/operator 字段从这取。上传文件名含'维护表'或'品牌字典'即自动识别。",
+  "enabled": true,
+  "hasTransform": false,
+  "isDict": true,
+  "role": "brand_dict",
+  "usages": [],
+  "columns": [
+    {
+      "name": "id",
+      "source": ["id", "商品ID", "货品ID"],
+      "type": "text",
+      "label": "商品 ID"
+    },
+    {
+      "name": "code",
+      "source": ["商家编码", "商品编码", "货品编码"],
+      "type": "text",
+      "label": "商家编码"
+    },
+    {
+      "name": "brand",
+      "source": "品牌",
+      "type": "text",
+      "label": "品牌"
+    },
+    {
+      "name": "shop",
+      "source": "店铺",
+      "type": "text",
+      "label": "店铺"
+    },
+    {
+      "name": "operator",
+      "source": "运营",
+      "type": "text",
+      "label": "运营"
+    },
+    {
+      "name": "category",
+      "source": "品类",
+      "type": "text",
+      "label": "品类"
+    },
+    {
+      "name": "product_name",
+      "source": ["产品名称", "商品名称"],
+      "type": "text",
+      "label": "产品名称"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "default",
+      "name": "品牌维护表",
+      "filePattern": "维护表|品牌.*字典|brand.*dict",
+      "patternFlags": "i",
+      "enabled": true
+    }
+  ]
+}

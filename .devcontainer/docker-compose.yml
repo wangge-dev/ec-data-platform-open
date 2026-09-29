@@ -1,0 +1,41 @@
+services:
+  workspace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    init: true
+    command: sleep infinity
+    working_dir: /workspaces/ec-data-platform
+    volumes:
+      - ..:/workspaces/ec-data-platform:cached
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://ec_app:codespaces_app_dev_only@postgres:5432/ec_data
+      MIGRATION_DATABASE_URL: postgres://ec:codespaces_postgres_dev_only@postgres:5432/ec_data
+      ADMIN_PASSWORD: codespaces_dev_admin_only
+      JWT_SECRET: codespaces_dev_only_jwt_secret_do_not_reuse_outside_this_environment
+      CORS_ORIGIN: http://localhost:5173
+      PORT: 4000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ec
+      POSTGRES_PASSWORD: codespaces_postgres_dev_only
+      POSTGRES_DB: ec_data
+      APP_DB_PASSWORD: codespaces_app_dev_only
+    volumes:
+      - codespaces-postgres:/var/lib/postgresql/data
+      - ../deploy/init-app-role.sh:/docker-entrypoint-initdb.d/10-init-app-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ec -d ec_data"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  codespaces-postgres:

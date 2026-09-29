@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "front-profit-real-sample-acceptance-result/v1",
+  "mode": "template",
+  "sourceManifest": {
+    "path": "front-profit-acceptance/manifest.json",
+    "periods": ["2026-08"],
+    "preflightPassed": false,
+    "checkFilesPassed": false,
+    "readinessPassed": false
+  },
+  "dryRun": {
+    "executedAt": "2026-08-10T00:00:00Z",
+    "executor": "TBD",
+    "isolationEnvironment": "TBD",
+    "migrationPassed": false,
+    "apiSmokePassed": false,
+    "repoCheckPassed": false
+  },
+  "runs": [
+    {
+      "period": "2026-08",
+      "jobRunId": 101,
+      "sourceIds": [11, 12, 13, 14, 15, 16, 17, 18],
+      "manualBaselineSourceId": 18,
+      "rowCounts": {
+        "l4Rows": 100,
+        "manualBaselineRows": 100,
+        "publishedRows": 100
+      },
+      "dq": {
+        "unresolvedBlockCount": 0,
+        "warningCount": 0,
+        "quarantinedRowCount": 0,
+        "explainedWarningCodes": []
+      },
+      "recon": {
+        "manualBaselineCompared": true,
+        "aggregationKeyCoverage": 1,
+        "failedCount": 0,
+        "diffRowCount": 0,
+        "maxMoneyDiff": 0.01
+      },
+      "publish": {
+        "authorityChangedByAdmin": true,
+        "publishVersionId": 201,
+        "publishedRowCount": 100,
+        "idempotencyKey": "front-profit:2026-08:run:101",
+        "retryReturnedVersionId": 201,
+        "retryCreatedNewVersion": false
+      },
+      "rollback": {
+        "rehearsed": true,
+        "rolledBackVersionId": 201,
+        "restoredVersionId": 200,
+        "restoredRowCount": 100,
+        "retryIdempotent": true
+      }
+    }
+  ],
+  "evidenceArtifacts": [
+    {
+      "kind": "dq_summary",
+      "path": "front-profit-acceptance/dq-summary.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    },
+    {
+      "kind": "recon_summary",
+      "path": "front-profit-acceptance/recon-summary.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    },
+    {
+      "kind": "diff_summary",
+      "path": "front-profit-acceptance/diff-summary.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    },
+    {
+      "kind": "publish_smoke",
+      "path": "front-profit-acceptance/publish-summary.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    },
+    {
+      "kind": "rollback_smoke",
+      "path": "front-profit-acceptance/rollback-summary.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    }
+  ],
+  "cleanup": {
+    "temporaryDbRemoved": false,
+    "temporaryUploadsRemoved": false,
+    "temporaryExportsRemoved": false,
+    "localCredentialsRemoved": false,
+    "retainedEvidenceOnly": false
+  },
+  "acceptance": {
+    "decision": "pending",
+    "acceptedBy": "TBD",
+    "acceptedAt": "2026-08-10T00:00:00Z",
+    "productionReleaseAuthorized": false,
+    "notes": "TBD"
+  },
+  "confirmations": {
+    "noSampleRowsInManifest": true,
+    "noCredentialsInManifest": true,
+    "noProductionDbTouched": true,
+    "noCiDependency": true
+  }
+}

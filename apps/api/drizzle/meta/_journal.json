@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1784193462152,
+      "tag": "0000_init",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784271334477,
+      "tag": "0001_unique_file_original_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784283922935,
+      "tag": "0002_user_module_configs",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785386108814,
+      "tag": "0003_damp_reaper",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786164673442,
+      "tag": "0004_charming_xorn",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786263412831,
+      "tag": "0005_complex_job_framework",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786266989898,
+      "tag": "0006_period_authority",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786271209516,
+      "tag": "0007_publish_sources_and_front_profit_rows",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786280972686,
+      "tag": "0008_front_profit_layer_skeleton",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786340823555,
+      "tag": "0009_front_profit_business_rule_skeleton",
+      "breakpoints": true
+    }
+  ]
+}

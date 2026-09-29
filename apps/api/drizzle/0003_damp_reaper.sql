@@ -1,0 +1,1 @@
+ALTER TABLE "public"."settings" ALTER COLUMN "key" SET DATA TYPE varchar(128);

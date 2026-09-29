@@ -1,0 +1,41 @@
+{
+  "code": "shop_pic_dict",
+  "name": "店铺 PIC 字典",
+  "category": "dict",
+  "categoryLabel": "字典/维护表",
+  "description": "店铺-运营负责人映射字典，广告/订单等模块 JOIN 取 pic。上传文件名含'PIC'或'店铺PIC维护表'自动识别。",
+  "enabled": true,
+  "hasTransform": false,
+  "isDict": true,
+  "role": "shop_pic_dict",
+  "usages": [],
+  "columns": [
+    {
+      "name": "shop_id",
+      "source": ["店铺ID", "shop_id", "Shop ID"],
+      "type": "text",
+      "label": "店铺 ID"
+    },
+    {
+      "name": "shop_name",
+      "source": ["店铺名称", "店铺", "Shop Name"],
+      "type": "text",
+      "label": "店铺名"
+    },
+    {
+      "name": "pic",
+      "source": ["运营负责人", "PIC", "运营"],
+      "type": "text",
+      "label": "运营负责人"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "default",
+      "name": "PIC 维护表",
+      "filePattern": "PIC|pic.*dict|店铺.*维护",
+      "patternFlags": "i",
+      "enabled": true
+    }
+  ]
+}

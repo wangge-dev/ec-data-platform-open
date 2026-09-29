@@ -1,0 +1,38 @@
+{
+  "name": "ec-data-platform",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev:db": "cd deploy && docker compose --env-file ../.env up -d",
+    "dev:api": "cd apps/api && pnpm dev",
+    "dev:web": "cd apps/web && pnpm dev",
+    "typecheck": "pnpm --filter @ec/api typecheck && pnpm --filter @ec/web typecheck",
+    "test": "pnpm test:api && pnpm test:web && pnpm test:migration-runtime",
+    "test:api": "pnpm --filter @ec/api test",
+    "test:web": "pnpm --filter @ec/web test",
+    "test:migration-runtime": "docker compose --env-file deploy/.env.example -f deploy/docker-compose.yml build api && powershell -NoProfile -ExecutionPolicy Bypass -File apps/api/test/migration-runtime-smoke.ps1",
+    "build": "pnpm --filter @ec/api build && pnpm --filter @ec/web build",
+    "verify:sheetjs": "node scripts/verify-sheetjs-package.mjs",
+    "test:sheetjs-integrity": "node --test scripts/verify-sheetjs-package.test.mjs",
+    "audit:prod": "pnpm audit --prod --audit-level high --registry=https://registry.npmjs.org/",
+    "audit:all": "pnpm audit --audit-level moderate --registry=https://registry.npmjs.org/",
+    "repo:check": "node scripts/check-repository-boundaries.mjs --mode=public",
+    "repo:check:public": "node scripts/check-repository-boundaries.mjs --mode=public",
+    "db:generate": "cd apps/api && pnpm drizzle-kit generate",
+    "db:push": "cd apps/api && pnpm drizzle-kit push"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "6.4.3",
+      "esbuild@<0.24.3": "0.25.12",
+      "postcss@<8.5.23": "8.5.23",
+      "nanoid@<3.3.18": "3.3.18",
+      "browserslist@<4.28.7": "4.28.7",
+      "baseline-browser-mapping@<2.11.0": "2.11.0"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

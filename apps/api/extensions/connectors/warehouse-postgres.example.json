@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "connector-manifest/v1",
+  "id": "warehouse.postgres",
+  "version": 1,
+  "label": "数仓 PostgreSQL",
+  "description": "复用已审核 PostgreSQL 只读适配器的公司数仓连接器档案。",
+  "adapter": "pg",
+  "defaultPort": 5432,
+  "sslMode": "required",
+  "capabilities": ["test", "list_tables", "query_readonly"]
+}

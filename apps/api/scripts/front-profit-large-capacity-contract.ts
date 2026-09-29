@@ -1,0 +1,38 @@
+export const LARGE_CAPACITY_THRESHOLDS = {
+  500_000: {
+    totalSeconds: 450,
+    recoveryTotalSeconds: 450,
+    fixtureGenerateSeconds: 20,
+    ufLoadSeconds: 80,
+    draftSeconds: 360,
+    recoveryDraftSeconds: 360,
+    alignedBaselineLoadSeconds: 3,
+    shadowReconSeconds: 2,
+    publishSeconds: 8,
+    runDetailQuerySeconds: 1,
+    postgresPeakMemoryBytes: 4_294_967_296,
+    runnerPeakWorkingSetBytes: 2_684_354_560,
+    databaseBytesAfterRun: 5_368_709_120,
+    volumeGrowthBytes: 8_589_934_592,
+    maxDraftSpreadRatio: 1.35,
+  },
+  1_000_000: {
+    totalSeconds: 850,
+    recoveryTotalSeconds: 900,
+    fixtureGenerateSeconds: 30,
+    ufLoadSeconds: 140,
+    draftSeconds: 700,
+    recoveryDraftSeconds: 780,
+    alignedBaselineLoadSeconds: 3,
+    shadowReconSeconds: 2,
+    publishSeconds: 8,
+    runDetailQuerySeconds: 1,
+    postgresPeakMemoryBytes: 7_516_192_768,
+    runnerPeakWorkingSetBytes: 3_221_225_472,
+    databaseBytesAfterRun: 10_737_418_240,
+    volumeGrowthBytes: 17_179_869_184,
+    maxDraftSpreadRatio: 1.6,
+  },
+} as const;
+
+export const LARGE_CAPACITY_ROWS = [500_000, 1_000_000] as const;

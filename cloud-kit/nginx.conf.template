@@ -1,0 +1,43 @@
+worker_processes auto;
+events { worker_connections 1024; }
+http {
+    # Caddy replaces untrusted forwarded headers; only the local proxy is trusted.
+    set_real_ip_from 127.0.0.1;
+    real_ip_header X-Forwarded-For;
+    real_ip_recursive on;
+    limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
+    map $request_method $write_client {
+        default "";
+        POST $binary_remote_addr;
+        PUT $binary_remote_addr;
+    }
+    limit_req_zone $write_client zone=uploads:10m rate=2r/s;
+    limit_req_status 429;
+    # No query strings, credentials, request bodies or customer identifiers in edge logs.
+    access_log off;
+    error_log /dev/stderr crit;
+    server {
+        listen 127.0.0.1:4080;
+        server_name @@DOMAIN@@;
+        client_max_body_size 50m;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+        location = /api/auth/login {
+            limit_req zone=login burst=5 nodelay;
+            proxy_pass http://127.0.0.1:4000;
+        }
+        location /api/files {
+            limit_req zone=uploads burst=3 nodelay;
+            # API applies its precise 512MB/1M-row raw CSV and ordinary-file limits.
+            client_max_body_size 513m;
+            proxy_request_buffering off;
+            proxy_pass http://127.0.0.1:4000;
+        }
+        location /api/ { proxy_pass http://127.0.0.1:4000; }
+        location / { proxy_pass http://127.0.0.1:3997; }
+    }
+}

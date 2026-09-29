@@ -1,0 +1,206 @@
+{
+  "schemaVersion": "front-profit-real-sample-acceptance/v1",
+  "mode": "template",
+  "authorization": {
+    "authorized": false,
+    "authorizationDate": "2026-08-10",
+    "authorizer": "TBD",
+    "executor": "TBD",
+    "allowedPurpose": "front-profit-isolated-dry-run",
+    "allowedPeriods": ["2026-08"],
+    "retentionDays": 7,
+    "isolationEnvironment": "TBD",
+    "confirmNoGit": true,
+    "confirmNoCi": true,
+    "confirmNoProductionDb": true,
+    "confirmSanitizedOnly": true,
+    "confirmCleanupRequired": true
+  },
+  "sources": [
+    {
+      "family": "operator_assignment",
+      "participating": true,
+      "alias": "operator-assignment-sample",
+      "rowCount": 100,
+      "dateField": "effective_from",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["shop", "operator"],
+      "sanitizedPath": "front-profit-acceptance/operator-assignment.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "operator_assignment.authority_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing"
+        }
+      ]
+    },
+    {
+      "family": "sales_fact",
+      "participating": true,
+      "alias": "sales-fact-sample",
+      "rowCount": 1000,
+      "dateField": "sale_date",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["order_id", "shop"],
+      "sanitizedPath": "front-profit-acceptance/sales-fact.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "sales_fact.sale_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing or duplicated"
+        }
+      ]
+    },
+    {
+      "family": "cost_period",
+      "participating": true,
+      "alias": "cost-period-sample",
+      "rowCount": 500,
+      "dateField": "effective_from",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["sku_key"],
+      "sanitizedPath": "front-profit-acceptance/cost-period.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "cost_period.sku_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing or overlapping"
+        }
+      ]
+    },
+    {
+      "family": "cost_usage",
+      "participating": true,
+      "alias": "cost-usage-sample",
+      "rowCount": 1000,
+      "dateField": "shipment_date",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["sale_key", "sku_key"],
+      "sanitizedPath": "front-profit-acceptance/cost-usage.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "cost_usage.sale_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing"
+        }
+      ]
+    },
+    {
+      "family": "rebate",
+      "participating": true,
+      "alias": "rebate-sample",
+      "rowCount": 100,
+      "dateField": "rebate_event_date",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["rebate_key", "sku_key"],
+      "sanitizedPath": "front-profit-acceptance/rebate.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "rebate.rebate_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing or duplicated"
+        }
+      ]
+    },
+    {
+      "family": "fee_fact",
+      "participating": true,
+      "alias": "fee-fact-sample",
+      "rowCount": 1000,
+      "dateField": "fee_date",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["fee_key", "shop"],
+      "sanitizedPath": "front-profit-acceptance/fee-fact.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "fee_fact.fee_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing authority source"
+        }
+      ]
+    },
+    {
+      "family": "promotion_spend",
+      "participating": true,
+      "alias": "promotion-spend-sample",
+      "rowCount": 1000,
+      "dateField": "promotion_date",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["promotion_key", "ad_account"],
+      "sanitizedPath": "front-profit-acceptance/promotion-spend.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "TBD",
+          "contractField": "promotion_spend.promotion_key",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "ALLOW orphan promotion spend but keep diagnostic row"
+        }
+      ]
+    },
+    {
+      "family": "manual_baseline",
+      "participating": true,
+      "alias": "manual-01-baseline",
+      "rowCount": 100,
+      "dateField": "date",
+      "dateRange": { "from": "2026-08-01", "to": "2026-08-31" },
+      "sourceSystem": "TBD",
+      "sensitiveFields": ["shop", "operator"],
+      "sanitizedPath": "front-profit-acceptance/manual-baseline.csv",
+      "fieldMappings": [
+        {
+          "sourceHeader": "record_id",
+          "contractField": "front_profit_standard.record_id",
+          "sanitization": "stable_hash",
+          "owner": "TBD",
+          "required": true,
+          "exceptionPolicy": "BLOCK when missing or duplicated"
+        }
+      ]
+    }
+  ],
+  "businessRules": {
+    "periodBasis": "calendar_month",
+    "closeDayOfNextMonth": 5,
+    "rebateKey": "rebate_key",
+    "rebateDate": "rebate_event_date",
+    "feeAuthorityPriority": ["settlement", "platform_bill", "rate_rule", "manual_estimate"],
+    "operatorAuthorityPriority": ["sku", "ad_account", "product_owner", "order_owner", "manual_mapping"],
+    "costMatchDate": "shipment_date",
+    "promotionOrphanPolicy": "keep_and_allow_negative_profit"
+  },
+  "dryRunGates": {
+    "aggregationKeyCoverage": 1,
+    "maxMoneyDiff": 0.01,
+    "unresolvedBlockCount": 0,
+    "publishRetryMustBeIdempotent": true,
+    "rollbackMustRestorePreviousVersion": true
+  }
+}

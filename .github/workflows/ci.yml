@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Typecheck, unit tests, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+      POSTGRES_PASSWORD: CiPostgres7Rk2Vm9
+      APP_DB_PASSWORD: CiAppDb8Qw4Nz6Ty
+      ADMIN_PASSWORD: CiAdmin9Lp5Xs3Ku
+      JWT_SECRET: CiJwt7Fh2Qm9Vr4Nz6Ty8Kp3Ws5Ld1Xc
+    services:
+      postgres:
+        image: postgres:16@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b
+        env:
+          POSTGRES_USER: ec
+          POSTGRES_PASSWORD: CiPostgres7Rk2Vm9
+          POSTGRES_DB: ec_data
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ec -d ec_data"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 20
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.9 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify pinned SheetJS artifact
+        run: pnpm verify:sheetjs
+
+      - name: Audit runtime and development dependencies
+        run: pnpm audit:all
+
+      - name: Prepare isolated PostgreSQL integration database
+        shell: bash
+        env:
+          MIGRATION_DATABASE_URL: postgres://ec:CiPostgres7Rk2Vm9@127.0.0.1:5432/ec_data
+        run: |
+          set -euo pipefail
+          pnpm --filter @ec/api exec node --input-type=module <<'NODE'
+          import postgres from "postgres";
+          const admin = postgres(process.env.MIGRATION_DATABASE_URL, { max: 1 });
+          try {
+            const [row] = await admin.unsafe(
+              "SELECT format('CREATE ROLE ec_app LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE', $1::text) AS command",
+              [process.env.APP_DB_PASSWORD],
+            );
+            await admin.unsafe(row.command);
+          } finally {
+            await admin.end();
+          }
+          NODE
+          pnpm --filter @ec/api exec tsx scripts/migrate.ts
+
+      - name: Run real front-profit advisory-lock integration
+        env:
+          RUN_DB_TESTS: "1"
+          TEST_DATABASE_URL: postgres://ec_app:CiAppDb8Qw4Nz6Ty@127.0.0.1:5432/ec_data
+        run: pnpm --filter @ec/api exec vitest run test/front-profit-advisory-lock.integration.test.ts --maxWorkers=1
+
+      - name: Check public repository boundaries
+        run: pnpm repo:check:public
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Cloud preparation behavior tests
+        run: python3 scripts/test-cloud-kit.py
+
+      - name: Cloud installer shell syntax
+        run: bash -n cloud-kit/install-ubuntu.sh
+
+      - name: Run API unit tests
+        run: pnpm test:api
+
+      - name: Run Web unit tests
+        run: pnpm test:web
+
+      - name: Build applications
+        run: pnpm build
+
+  docker-images:
+    name: Build deployable Docker images
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+
+      - name: Build and load API image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          platforms: linux/amd64
+          pull: true
+          load: true
+          push: false
+          tags: ec-data-ci-api:${{ github.sha }}
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
+          cache-from: type=gha,scope=ci-api
+          cache-to: type=gha,mode=max,scope=ci-api
+
+      - name: Build and load Web image
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          platforms: linux/amd64
+          pull: true
+          load: true
+          push: false
+          tags: ec-data-ci-web:${{ github.sha }}
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
+          cache-from: type=gha,scope=ci-web
+          cache-to: type=gha,mode=max,scope=ci-web
+
+      - name: Verify runtime closures and image health contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          api_image="ec-data-ci-api:${GITHUB_SHA}"
+          web_image="ec-data-ci-web:${GITHUB_SHA}"
+          docker run --rm --entrypoint node "${api_image}" \
+            scripts/verify-runtime-package.mjs /app/apps/api
+          docker run --rm --add-host api:127.0.0.1 --entrypoint sh "${web_image}" -c \
+            'test -s /usr/share/nginx/html/index.html && nginx -t'
+          for image in "${api_image}" "${web_image}"; do
+            health_test="$(docker image inspect --format '{{json .Config.Healthcheck.Test}}' "${image}")"
+            if [[ -z "${health_test}" || "${health_test}" == "null" || "${health_test}" == "[]" ]]; then
+              echo "Image does not define a health check: ${image}" >&2
+              exit 1
+            fi
+          done

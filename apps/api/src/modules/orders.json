@@ -1,0 +1,222 @@
+{
+  "$schema": "../schema.ts",
+  "code": "orders",
+  "name": "销售订单",
+  "category": "shop_ops",
+  "categoryLabel": "店铺经营",
+  "description": "多平台订单 ETL：从淘工厂/进口超市/旗舰店/阿里健康的订单导出文件，统一加工成销售汇总，关联品牌维护表补品牌/运营/品类",
+  "_AI说明": "给国内销售订单增加新平台时，在下面 platforms[] 加一项，填 filePattern（匹配导出文件名的正则）+ columnOverrides（规范列名→该平台的原始表头列名）。改完调 POST /api/modules/reload 热生效，无需重启。详见 docs/HOW_TO_ADD_PLATFORM.md。columns[] 的 source 是默认列名，columnOverrides 按平台覆盖。join.on.product_id 的值是字典侧关联列（id 或 code）。dictKey 现在自动从 join.on 推导，不再需要单独配。",
+  "enabled": true,
+  "hasTransform": true,
+  "outputTable": "unified_sales",
+  "timeKey": "pay_time",
+  "usages": [
+    "summary",
+    "ai_chart",
+    "ai_analysis"
+  ],
+  "semanticModel": {
+    "schemaVersion": "semantic-manifest/v1",
+    "id": "orders.analysis",
+    "version": 1,
+    "dimensions": [
+      { "id": "orders.pay_date", "label": "付款日期", "field": "pay_time", "kind": "time" },
+      { "id": "orders.platform", "label": "平台", "field": "platform" },
+      { "id": "orders.brand", "label": "品牌", "field": "brand" },
+      { "id": "orders.shop", "label": "店铺", "field": "shop" },
+      { "id": "orders.operator", "label": "运营", "field": "operator" },
+      { "id": "orders.category", "label": "品类", "field": "category" },
+      { "id": "orders.product", "label": "商品", "field": "product_id" }
+    ],
+    "metrics": [
+      { "id": "orders.sales_amount", "label": "销售额", "aggregation": "sum", "field": "amount", "unit": "currency" },
+      { "id": "orders.quantity", "label": "销量", "aggregation": "sum", "field": "qty", "unit": "quantity" },
+      { "id": "orders.order_rows", "label": "订单行数", "aggregation": "count", "field": "row_key", "unit": "number" }
+    ]
+  },
+  "presets": [
+    {
+      "key": "platform_dod",
+      "label": "各平台销售日环比",
+      "description": "看每个平台的销售额今日 vs 昨日",
+      "target": "compare",
+      "metricId": "orders.sales_amount",
+      "dimensionId": "orders.platform",
+      "period": "dod",
+      "emphasis": "neutral"
+    },
+    {
+      "key": "brand_mom",
+      "label": "品牌销售月同比",
+      "description": "看每个品牌的销售额本月 vs 上月",
+      "target": "compare",
+      "metricId": "orders.sales_amount",
+      "dimensionId": "orders.brand",
+      "period": "mom",
+      "emphasis": "info"
+    },
+    {
+      "key": "operator_ranking",
+      "label": "运营销售排行",
+      "description": "看每个运营的销售额日环比",
+      "target": "compare",
+      "metricId": "orders.sales_amount",
+      "dimensionId": "orders.operator",
+      "period": "dod",
+      "emphasis": "neutral"
+    }
+  ],
+  "columns": [
+    {
+      "name": "product_id",
+      "source": "商品编码",
+      "type": "text",
+      "maxLen": 128,
+      "required": true,
+      "label": "商品ID",
+      "hint": "用于 JOIN 品牌维护表的关联键，各平台叫法不同（商品ID/前端商品ID/商品编码）"
+    },
+    {
+      "name": "qty",
+      "source": "数量",
+      "type": "int",
+      "label": "数量",
+      "hint": "购买/发货数量"
+    },
+    {
+      "name": "amount",
+      "source": "金额",
+      "type": "numeric",
+      "required": true,
+      "label": "销售额",
+      "hint": "订单实付金额（元）"
+    },
+    {
+      "name": "pay_time",
+      "source": "付款时间",
+      "type": "timestamp",
+      "label": "付款时间",
+      "hint": "优先用付款时间，没有则退回下单时间"
+    },
+    {
+      "name": "main_order_no",
+      "source": "主订单号",
+      "type": "text",
+      "maxLen": 64,
+      "label": "主订单号"
+    },
+    {
+      "name": "row_key",
+      "source": "子订单号",
+      "type": "text",
+      "maxLen": 160,
+      "required": true,
+      "label": "唯一行键",
+      "hint": "用于去重，各平台用子订单号/发货单ID"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "taogongchang",
+      "name": "淘工厂",
+      "filePattern": "GEI@EXPORT_ORDER_INFO",
+      "patternFlags": "i",
+      "enabled": true,
+      "columnOverrides": {
+        "product_id": "商品编码",
+        "qty": "宝贝数量",
+        "amount": "买家实际支付金额",
+        "pay_time": [
+          "订单付款时间",
+          "订单创建时间"
+        ],
+        "main_order_no": "主订单编号",
+        "row_key": "子订单编号"
+      },
+      "statusFilter": {
+        "statusColumn": "订单状态",
+        "excludeStatus": ["交易关闭"]
+      }
+    },
+    {
+      "code": "import_market",
+      "name": "进口超市",
+      "filePattern": "全部数据导出",
+      "patternFlags": "",
+      "enabled": true,
+      "columnOverrides": {
+        "product_id": "商品id",
+        "qty": "商品数量",
+        "amount": "订单金额",
+        "pay_time": [
+          "支付时间",
+          "下单时间"
+        ],
+        "main_order_no": "交易订单号",
+        "row_key": "子交易单号"
+      },
+      "statusFilter": {
+        "statusColumn": "订单状态",
+        "excludeStatus": ["交易关闭", "已关闭", "交易自动关闭"]
+      }
+    },
+    {
+      "code": "flagship",
+      "name": "旗舰店",
+      "filePattern": "ExportOrderList",
+      "patternFlags": "i",
+      "enabled": true,
+      "columnOverrides": {
+        "product_id": "商品ID",
+        "qty": "购买数量",
+        "amount": "买家实付金额",
+        "pay_time": [
+          "订单付款时间",
+          "订单创建时间"
+        ],
+        "main_order_no": "主订单编号",
+        "row_key": "子订单编号"
+      },
+      "statusFilter": {
+        "statusColumn": "订单状态",
+        "excludeStatus": ["交易关闭"],
+        "refundColumn": "退款状态",
+        "refundExclude": ["退款成功"]
+      }
+    },
+    {
+      "code": "ali_health",
+      "name": "阿里健康",
+      "filePattern": "shiporder",
+      "patternFlags": "i",
+      "enabled": true,
+      "columnOverrides": {
+        "product_id": "前端商品ID",
+        "qty": "商品数量",
+        "amount": "金额(不作为结算依据，仅供参考)",
+        "pay_time": "下单时间",
+        "main_order_no": "主订单ID",
+        "row_key": "主发货单ID"
+      },
+      "statusFilter": {
+        "statusColumn": "发货状态",
+        "excludeStatus": ["已废弃(关闭)", "待接单(待下发仓库)"],
+        "refundColumn": "是否退款",
+        "refundExclude": ["已退款"]
+      }
+    }
+  ],
+  "join": {
+    "dictRole": "brand_dict",
+    "on": {
+      "product_id": "id"
+    },
+    "enrich": {
+      "brand": "品牌",
+      "shop": "店铺",
+      "operator": "所属运营",
+      "category": "品类",
+      "product_name": "产品名称"
+    }
+  }
+}

@@ -1,0 +1,77 @@
+name: Codespaces Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".devcontainer/**"
+      - ".github/workflows/codespaces-smoke.yml"
+      - "apps/api/migrations/**"
+      - "apps/api/scripts/migrate.ts"
+      - "apps/api/scripts/seed.ts"
+      - "deploy/init-app-role.sh"
+      - "pnpm-lock.yaml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codespaces-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime:
+    name: Build devcontainer and verify runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_PROJECT_NAME: codespaces-smoke
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Validate devcontainer configuration
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml config --quiet
+          bash -n .devcontainer/scripts/*.sh
+
+      - name: Build and start isolated development services
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml build workspace
+          docker compose -f .devcontainer/docker-compose.yml up -d postgres workspace
+          docker compose -f .devcontainer/docker-compose.yml exec -T --user root workspace \
+            chown -R node:node /workspaces/ec-data-platform
+
+      - name: Install, migrate, and seed
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml exec -T workspace \
+            bash .devcontainer/scripts/bootstrap.sh
+          docker compose -f .devcontainer/docker-compose.yml exec -T workspace \
+            bash .devcontainer/scripts/prepare-db.sh
+
+      - name: Start API and Web
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml exec -d workspace \
+            bash -lc 'bash .devcontainer/scripts/start-dev.sh >/tmp/ec-data-platform-dev.log 2>&1'
+
+      - name: Verify PostgreSQL, API, Web, and login
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml exec -T workspace \
+            bash .devcontainer/scripts/smoke-test.sh
+
+      - name: Show diagnostics on failure
+        if: failure()
+        run: |
+          docker compose -f .devcontainer/docker-compose.yml ps --all
+          docker compose -f .devcontainer/docker-compose.yml logs --no-color --tail=200 postgres workspace
+          docker compose -f .devcontainer/docker-compose.yml exec -T workspace \
+            sh -c 'test ! -f /tmp/ec-data-platform-dev.log || tail -n 200 /tmp/ec-data-platform-dev.log'
+
+      - name: Stop isolated development services
+        if: always()
+        run: docker compose -f .devcontainer/docker-compose.yml down --remove-orphans

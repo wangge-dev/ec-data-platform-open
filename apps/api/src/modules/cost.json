@@ -1,0 +1,91 @@
+{
+  "code": "cost",
+  "name": "商品成本",
+  "category": "shop_ops",
+  "categoryLabel": "店铺经营",
+  "description": "ERP 导出的商品成本表 ETL。SKU/采购成本/物流成本/包装成本/总成本，按月维护。订单模块跑完后从这张表 JOIN 取 cost 字段。",
+  "enabled": true,
+  "hasTransform": false,
+  "outputTable": "unified_cost",
+  "timeKey": "snapshot_month",
+  "usages": ["summary", "ai_chart", "ai_analysis"],
+  "semanticModel": {
+    "schemaVersion": "semantic-manifest/v1",
+    "id": "cost.analysis",
+    "version": 1,
+    "dimensions": [
+      { "id": "cost.month", "label": "成本月份", "field": "snapshot_month", "kind": "time" },
+      { "id": "cost.sku", "label": "SKU", "field": "sku" }
+    ],
+    "metrics": [
+      { "id": "cost.total", "label": "总成本", "aggregation": "sum", "field": "total_cost", "unit": "currency" },
+      { "id": "cost.purchase", "label": "采购成本", "aggregation": "sum", "field": "purchase_cost", "unit": "currency" },
+      { "id": "cost.logistics", "label": "物流成本", "aggregation": "sum", "field": "logistics_cost", "unit": "currency" },
+      { "id": "cost.package", "label": "包装成本", "aggregation": "sum", "field": "package_cost", "unit": "currency" }
+    ]
+  },
+  "presets": [
+    {
+      "key": "total_cost_trend",
+      "label": "总成本月同比",
+      "description": "本月 vs 上月各 SKU 总成本对比",
+      "target": "compare",
+      "metricId": "cost.total",
+      "dimensionId": "cost.sku",
+      "period": "mom",
+      "emphasis": "info"
+    }
+  ],
+  "columns": [
+    {
+      "name": "sku",
+      "source": ["SKU", "商品编码", "货品编码"],
+      "type": "text",
+      "maxLen": 128,
+      "required": true,
+      "label": "SKU",
+      "hint": "成本表主键，订单 JOIN 用"
+    },
+    {
+      "name": "purchase_cost",
+      "source": ["采购成本", "采购单价"],
+      "type": "numeric",
+      "label": "采购成本"
+    },
+    {
+      "name": "logistics_cost",
+      "source": "物流成本",
+      "type": "numeric",
+      "label": "物流成本"
+    },
+    {
+      "name": "package_cost",
+      "source": "包装成本",
+      "type": "numeric",
+      "label": "包装成本"
+    },
+    {
+      "name": "total_cost",
+      "computed": true,
+      "type": "numeric",
+      "expression": "COALESCE(purchase_cost,0) + COALESCE(logistics_cost,0) + COALESCE(package_cost,0)",
+      "label": "总成本",
+      "hint": "三项成本相加。如果原表已经有总成本列，把 source 改成原列名并删 computed/expression"
+    },
+    {
+      "name": "snapshot_month",
+      "source": "月份",
+      "type": "date",
+      "label": "成本月份"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "erp_cost",
+      "name": "ERP 成本表",
+      "filePattern": "成本.*xlsx?$|cost.*xlsx?$",
+      "patternFlags": "i",
+      "enabled": true
+    }
+  ]
+}

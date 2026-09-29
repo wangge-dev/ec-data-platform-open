@@ -1,0 +1,35 @@
+{
+  "code": "cost_dict",
+  "name": "成本字典",
+  "category": "dict",
+  "categoryLabel": "字典/维护表",
+  "description": "SKU-成本映射字典，订单或经营宽表 JOIN 取 unit_cost。上传文件名含'成本字典'或路径在 /成本字典/ 子目录自动识别。",
+  "enabled": true,
+  "hasTransform": false,
+  "isDict": true,
+  "role": "cost_dict",
+  "usages": [],
+  "columns": [
+    {
+      "name": "sku",
+      "source": ["SKU", "商品编码", "货品编码"],
+      "type": "text",
+      "label": "SKU"
+    },
+    {
+      "name": "total_cost",
+      "source": ["总成本", "单位成本"],
+      "type": "numeric",
+      "label": "总成本"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "default",
+      "name": "成本字典",
+      "filePattern": "成本字典|cost.*dict",
+      "patternFlags": "i",
+      "enabled": true
+    }
+  ]
+}

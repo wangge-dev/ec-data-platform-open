@@ -1,0 +1,109 @@
+services:
+  postgres:
+    image: postgres:16
+    pull_policy: never
+    container_name: ${POSTGRES_CONTAINER_NAME:-ec-data-postgres}
+    environment:
+      POSTGRES_USER: ec
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: ec_data
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set APP_DB_PASSWORD in deploy/.env}
+    ports:
+      - "${POSTGRES_HOST_PORT:-127.0.0.1:5432}:5432"
+    volumes:
+      - ec-data-pg:/var/lib/postgresql/data
+      - ./init-app-role.sh:/docker-entrypoint-initdb.d/10-init-app-role.sh:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ec -d ec_data"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    pull_policy: never
+    container_name: ${REDIS_CONTAINER_NAME:-ec-data-redis}
+    ports:
+      - "${REDIS_HOST_PORT:-127.0.0.1:6379}:6379"
+    volumes:
+      - ec-data-redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    image: deploy-api:latest
+    pull_policy: never
+    container_name: ${MIGRATE_CONTAINER_NAME:-ec-data-migrate}
+    working_dir: /app/apps/api
+    entrypoint: ["./node_modules/.bin/tsx", "scripts/migrate.ts"]
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set APP_DB_PASSWORD in deploy/.env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in deploy/.env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in deploy/.env}
+      MIGRATION_DATABASE_URL: postgres://ec:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/ec_data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    image: deploy-api:latest
+    pull_policy: never
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    container_name: ${API_CONTAINER_NAME:-ec-data-api}
+    environment:
+      # 容器网络内：主机名直接用 service 名 postgres/redis
+      # DB 连接用最小权限角色 ec_app（非 superuser）——sql-guard 被绕过时限制杀伤面。
+      # 超级用户 ec 仅用于建库/建角色/迁移，不给应用运行时用。
+      DATABASE_URL: postgres://ec_app:${APP_DB_PASSWORD:?Set APP_DB_PASSWORD in deploy/.env}@postgres:5432/ec_data
+      REDIS_URL: redis://redis:6379
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in deploy/.env}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      ALLOW_PRIVATE_SQL_HOST: ${ALLOW_PRIVATE_SQL_HOST:-0}
+      DIY_EXTENSIONS_DIR: /app/apps/api/extensions
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in deploy/.env}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3997}
+      PORT: 4000
+    ports:
+      - "${API_HOST_PORT:-127.0.0.1:4000}:4000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    volumes:
+      # 挂载 modules 目录：宿主改 *.json 后调 POST /modules/reload 即时热生效，
+      # 不用重建镜像。加新平台=改 JSON + reload，对"读者+AI"场景友好。
+      # 注意：开发期挂载源文件；分享/生产部署时去掉此挂载（用镜像内打包的文件）。
+      - ../apps/api/src/modules:/app/apps/api/src/modules:ro
+      # 纯 JSON 扩展档案；只允许复用已审核连接器适配器，不加载任意代码。
+      - ../apps/api/extensions:/app/apps/api/extensions:ro
+    restart: unless-stopped
+
+  web:
+    image: deploy-web:latest
+    pull_policy: never
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    container_name: ${WEB_CONTAINER_NAME:-ec-data-web}
+    ports:
+      # 用 3997 避开 80（80 容易被系统代理/防火墙劫持，也可能被 IIS/skype 占用）
+      - "${WEB_HOST_PORT:-127.0.0.1:3997}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ec-data-pg:
+  ec-data-redis:

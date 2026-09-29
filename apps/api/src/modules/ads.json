@@ -1,0 +1,198 @@
+{
+  "code": "ads",
+  "name": "广告花费",
+  "category": "shop_ops",
+  "categoryLabel": "店铺经营",
+  "description": "TikTok/淘宝广告平台导出的花费数据 ETL。按店铺/日维度，统计花费/曝光/点击/订单/ROAS，给运营看板算广告占比。",
+  "enabled": true,
+  "hasTransform": false,
+  "outputTable": "unified_ads",
+  "timeKey": "ad_date",
+  "schedule": "23 * * * *",
+  "usages": ["summary", "ai_chart", "ai_analysis"],
+  "semanticModel": {
+    "schemaVersion": "semantic-manifest/v1",
+    "id": "ads.analysis",
+    "version": 1,
+    "dimensions": [
+      { "id": "ads.date", "label": "投放日期", "field": "ad_date", "kind": "time" },
+      { "id": "ads.shop", "label": "店铺", "field": "shop_id" },
+      { "id": "ads.operator", "label": "运营", "field": "pic" }
+    ],
+    "metrics": [
+      { "id": "ads.spend", "label": "广告花费", "aggregation": "sum", "field": "ads_spend", "unit": "currency" },
+      { "id": "ads.impressions", "label": "曝光量", "aggregation": "sum", "field": "impressions", "unit": "number" },
+      { "id": "ads.clicks", "label": "点击量", "aggregation": "sum", "field": "clicks", "unit": "number" },
+      { "id": "ads.orders", "label": "广告订单数", "aggregation": "sum", "field": "orders", "unit": "quantity" },
+      {
+        "id": "ads.ctr",
+        "label": "点击率 CTR",
+        "aggregation": "ratio",
+        "numeratorField": "clicks",
+        "denominatorField": "impressions",
+        "unit": "percent"
+      },
+      {
+        "id": "ads.cpc",
+        "label": "单次点击成本 CPC",
+        "aggregation": "ratio",
+        "numeratorField": "ads_spend",
+        "denominatorField": "clicks",
+        "unit": "currency"
+      }
+    ]
+  },
+  "presets": [
+    {
+      "key": "spend_by_pic",
+      "label": "PIC 广告花费日环比",
+      "description": "看每个运营的广告花费今日 vs 昨日",
+      "target": "compare",
+      "metricId": "ads.spend",
+      "dimensionId": "ads.operator",
+      "period": "dod",
+      "emphasis": "info"
+    },
+    {
+      "key": "spend_by_shop",
+      "label": "店铺广告花费排行",
+      "description": "按店铺看广告花费日环比",
+      "target": "compare",
+      "metricId": "ads.spend",
+      "dimensionId": "ads.shop",
+      "period": "dod",
+      "emphasis": "neutral"
+    },
+    {
+      "key": "ctr_trend",
+      "label": "店铺 CTR 月同比",
+      "description": "看每个店铺平均点击率 vs 上月",
+      "target": "compare",
+      "metricId": "ads.ctr",
+      "dimensionId": "ads.shop",
+      "period": "mom",
+      "emphasis": "neutral"
+    },
+    {
+      "key": "high_ads_alert",
+      "label": "🟠 高广告占比预警",
+      "description": "广告花费 / GMV > 8% 的店铺（需配合 orders 模块联合分析）",
+      "target": "compare",
+      "metricId": "ads.spend",
+      "dimensionId": "ads.operator",
+      "period": "dod",
+      "emphasis": "warning"
+    }
+  ],
+  "alerts": [
+    {
+      "key": "high_cpc",
+      "label": "CPC 过高店铺",
+      "severity": "warning",
+      "sql": "SELECT shop_id, shop_name, ad_date, cpc FROM unified_ads WHERE cpc > 0.8 ORDER BY cpc DESC LIMIT 50",
+      "message": "店铺 ${shop_name}(${shop_id}) ${ad_date} 单次点击成本 ${cpc}，高于阈值 0.8"
+    },
+    {
+      "key": "low_ctr",
+      "label": "CTR 过低",
+      "severity": "info",
+      "sql": "SELECT shop_id, shop_name, ad_date, ctr, ads_spend FROM unified_ads WHERE ctr < 0.012 AND ads_spend > 100 ORDER BY ctr LIMIT 50",
+      "message": "店铺 ${shop_name}(${shop_id}) ${ad_date} 点击率仅 ${ctr}（花费 ${ads_spend}）"
+    }
+  ],
+  "columns": [
+    {
+      "name": "shop_id",
+      "source": ["店铺ID", "店铺id", "Shop ID", "shop_id"],
+      "type": "text",
+      "maxLen": 64,
+      "label": "店铺ID",
+      "hint": "JOIN 店铺-PIC 维护表关联键。维度非指标；整文件单店铺且数据行无此列时可留空"
+    },
+    {
+      "name": "shop_name",
+      "source": ["店铺", "店铺名称", "Shop Name"],
+      "type": "text",
+      "maxLen": 128,
+      "label": "店铺名"
+    },
+    {
+      "name": "ad_date",
+      "source": ["日期", "Date", "投放日期"],
+      "type": "date",
+      "required": true,
+      "label": "广告日期"
+    },
+    {
+      "name": "ads_spend",
+      "source": ["广告花费", "Ads Spend", "花费"],
+      "type": "numeric",
+      "label": "广告花费"
+    },
+    {
+      "name": "impressions",
+      "source": ["曝光", "曝光量", "Impressions"],
+      "type": "int",
+      "label": "曝光"
+    },
+    {
+      "name": "clicks",
+      "source": ["点击", "点击数", "Clicks"],
+      "type": "int",
+      "label": "点击"
+    },
+    {
+      "name": "orders",
+      "source": ["订单", "订单数", "Orders"],
+      "type": "int",
+      "label": "订单"
+    },
+    {
+      "name": "roas",
+      "source": ["ROAS", "投产比"],
+      "type": "numeric",
+      "label": "ROAS"
+    },
+    {
+      "name": "ctr",
+      "computed": true,
+      "type": "numeric",
+      "expression": "CASE WHEN COALESCE(impressions,0)=0 THEN NULL ELSE clicks::numeric / impressions END",
+      "label": "点击率 CTR",
+      "hint": "点击/曝光"
+    },
+    {
+      "name": "cpc",
+      "computed": true,
+      "type": "numeric",
+      "expression": "CASE WHEN COALESCE(clicks,0)=0 THEN NULL ELSE ads_spend::numeric / clicks END",
+      "label": "单次点击成本 CPC",
+      "hint": "花费/点击"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "tiktok_ads",
+      "name": "TikTok 广告",
+      "filePattern": "tiktok.*ads|tiktok.*广告",
+      "patternFlags": "i",
+      "enabled": true
+    },
+    {
+      "code": "taobao_ads",
+      "name": "淘宝广告",
+      "filePattern": "淘宝.*广告|taobao.*ads|直通车|万相台",
+      "patternFlags": "i",
+      "enabled": true
+    }
+  ],
+  "join": {
+    "dictRole": "shop_pic_dict",
+    "on": { "shop_id": "店铺ID" },
+    "enrich": {
+      "pic": "运营负责人",
+      "shop_name_dict": "店铺名称"
+    },
+    "label": "PIC 关联"
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "code": "inventory",
+  "name": "库存快照",
+  "category": "warehouse",
+  "categoryLabel": "仓储管理",
+  "description": "各平台库存导出表统一 ETL。纯 JSON 配置（无钩子），演示默认行映射。加新平台只需在 platforms 数组加一项 columnOverrides。",
+  "enabled": true,
+  "hasTransform": false,
+  "outputTable": "unified_inventory",
+  "schedule": "7 * * * *",
+  "usages": ["summary", "ai_chart", "ai_analysis"],
+  "semanticModel": {
+    "schemaVersion": "semantic-manifest/v1",
+    "id": "inventory.analysis",
+    "version": 1,
+    "dimensions": [
+      { "id": "inventory.snapshot_date", "label": "快照日期", "field": "snapshot_time", "kind": "time" },
+      { "id": "inventory.warehouse", "label": "仓库", "field": "warehouse" },
+      { "id": "inventory.brand", "label": "品牌", "field": "brand" },
+      { "id": "inventory.category", "label": "品类", "field": "category" },
+      { "id": "inventory.product", "label": "商品", "field": "product_id" }
+    ],
+    "metrics": [
+      {
+        "id": "inventory.stock_quantity",
+        "label": "库存量",
+        "aggregation": "sum",
+        "field": "stock_qty",
+        "unit": "quantity",
+        "additiveAcrossTime": false,
+        "description": "库存是时点快照，只允许按日期分组或限定单个快照日期后汇总。"
+      },
+      { "id": "inventory.sku_count", "label": "SKU 数", "aggregation": "count", "field": "product_id", "unit": "number" }
+    ]
+  },
+  "presets": [
+    {
+      "key": "low_stock",
+      "label": "🔴 低库存预警",
+      "description": "库存 < 10 的 SKU，按品牌分组（is_low_stock=true 触发）",
+      "target": "compare",
+      "metricId": "inventory.stock_quantity",
+      "dimensionId": "inventory.brand",
+      "period": "dod",
+      "emphasis": "warning"
+    },
+    {
+      "key": "warehouse_total",
+      "label": "各仓库存总量",
+      "description": "按仓库分组看可用库存量",
+      "target": "compare",
+      "metricId": "inventory.stock_quantity",
+      "dimensionId": "inventory.warehouse",
+      "period": "dod",
+      "emphasis": "neutral"
+    }
+  ],
+  "alerts": [
+    {
+      "key": "low_stock_sku",
+      "label": "低库存 SKU",
+      "severity": "warning",
+      "sql": "SELECT product_id, product_name, stock_qty, warehouse FROM unified_inventory WHERE is_low_stock = true ORDER BY stock_qty",
+      "message": "SKU ${product_id} (${product_name}) 库存仅剩 ${stock_qty}（仓库：${warehouse}）"
+    },
+    {
+      "key": "out_of_stock",
+      "label": "断货 SKU",
+      "severity": "critical",
+      "sql": "SELECT product_id, product_name, warehouse FROM unified_inventory WHERE stock_qty IS NULL OR stock_qty = 0",
+      "message": "🚨 SKU ${product_id} (${product_name}) 已断货（仓库：${warehouse}）"
+    }
+  ],
+  "columns": [
+    {
+      "name": "product_id",
+      "source": ["商品编码", "货品编码", "商家编码"],
+      "type": "text",
+      "maxLen": 128,
+      "required": true,
+      "label": "商品 ID",
+      "hint": "品牌维护表里 JOIN 用的字段。不同平台叫法不同，这里给三个候选名"
+    },
+    {
+      "name": "product_name",
+      "source": "商品名称",
+      "type": "text",
+      "maxLen": 256,
+      "required": false,
+      "label": "商品名称"
+    },
+    {
+      "name": "stock_qty",
+      "source": "库存数量",
+      "type": "int",
+      "required": false,
+      "label": "库存量",
+      "hint": "可售库存或实物库存，按平台定义"
+    },
+    {
+      "name": "warehouse",
+      "source": "仓库",
+      "type": "text",
+      "maxLen": 64,
+      "required": false,
+      "label": "仓库名称",
+      "hint": "有分仓时填，不填默认主仓"
+    },
+    {
+      "name": "snapshot_time",
+      "source": "盘点日期",
+      "type": "date",
+      "required": false,
+      "label": "快照日期",
+      "hint": "MM/dd/yyyy、yyyy-MM-dd、yyyyMMdd 都行，自动转 DATE"
+    },
+    {
+      "name": "is_low_stock",
+      "computed": true,
+      "type": "boolean",
+      "expression": "stock_qty IS NOT NULL AND stock_qty < 10",
+      "label": "低库存标志",
+      "hint": "演示计算字段：库存<10 自动标 true。可改阈值"
+    }
+  ],
+  "platforms": [
+    {
+      "code": "warehouse_a",
+      "name": "A 仓库存",
+      "filePattern": "A仓.*库存|stock.*warehouse_a",
+      "patternFlags": "i",
+      "enabled": true,
+      "columnOverrides": {
+        "stock_qty": "可用库存数",
+        "warehouse": "A仓"
+      }
+    },
+    {
+      "code": "warehouse_b",
+      "name": "B 仓库存",
+      "filePattern": "B仓.*库存|stock.*warehouse_b",
+      "patternFlags": "i",
+      "enabled": true,
+      "columnOverrides": {
+        "stock_qty": "实物库存数"
+      }
+    },
+    {
+      "code": "all_warehouse",
+      "name": "全仓汇总",
+      "filePattern": "全网库存|stock.*all",
+      "patternFlags": "i",
+      "enabled": true
+    }
+  ],
+  "join": {
+    "dictRole": "brand_dict",
+    "on": { "product_id": "商家编码" },
+    "enrich": {
+      "brand": "品牌",
+      "category": "品类"
+    }
+  }
+}

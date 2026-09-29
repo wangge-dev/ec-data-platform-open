@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "front-profit-template/v1.1",
+  "releasedAt": "2026-08-05",
+  "containsRealBusinessData": false,
+  "profitFormula": "出货货值-产品成本-运费-补单金额-平台扣点/毛保-税点-财务成本-佣金-推广费+补单产品成本",
+  "realRevenueFormula": "GMV-补单金额",
+  "paidRatioFormula": "推广费/GMV; GMV=0 => 0",
+  "aggregationKey": [
+    "日期",
+    "平台",
+    "业务模式",
+    "店铺",
+    "运营"
+  ],
+  "files": [
+    {
+      "name": "01-电商前台利润单表上传模板.xlsx",
+      "sha256": "B8EEEA0E44FA2D12E37B4FF024E7C54017D5FA4CFCD7A4EC6B5964657B1CFD6B",
+      "purpose": "self-service-single-table-upload",
+      "sheetNames": [
+        "前台利润标准数据"
+      ],
+      "businessDataRows": 0,
+      "syntheticTypeHintRows": 1,
+      "syntheticRowPolicy": "Delete or fully overwrite the yellow sample row before production analysis.",
+      "headers": [
+        "日期",
+        "平台",
+        "业务模式",
+        "组",
+        "店铺",
+        "店铺2",
+        "运营",
+        "单量",
+        "GMV",
+        "补单金额",
+        "补单产品成本",
+        "补单单量",
+        "产品成本",
+        "出货货值",
+        "平台扣点/毛保",
+        "税点",
+        "财务成本",
+        "运费",
+        "佣金",
+        "推广费",
+        "来源文件",
+        "来源批次",
+        "备注",
+        "真实营业额",
+        "前台利润",
+        "付费占比",
+        "record_id",
+        "数据状态"
+      ]
+    },
+    {
+      "name": "02-电商前台利润数据准备与映射模板.xlsx",
+      "sha256": "14D6B31AB8A02AC1E7DB48E55E479AFC25A171463762AC1BCDEA3055F5930F94",
+      "purpose": "data-preparation-mapping-and-validation",
+      "sheetNames": [
+        "使用说明",
+        "前台利润标准表",
+        "经营明细接口",
+        "费用事实接口",
+        "SKU运营映射",
+        "店铺账户映射",
+        "字段字典",
+        "规则与验收",
+        "Checks"
+      ],
+      "businessDataRows": 0,
+      "containsSyntheticFormulaTests": true
+    }
+  ],
+  "moduleBuilderMapping": {
+    "name": "电商前台利润",
+    "category": "shop_ops",
+    "filenamePhrase": "前台利润单表上传模板",
+    "semanticFields": {
+      "time": "日期",
+      "amount": "GMV",
+      "quantity": "单量",
+      "shop": "店铺",
+      "dimension": "运营"
+    },
+    "preserveAllOtherFields": true
+  }
+}

@@ -1,0 +1,15 @@
+# Known false positive: deterministic idempotency key used only by an acceptance test.
+23d2c8056a9bbe9f5f5275a2615871d84980206f:apps/api/test/self-service-module-acceptance.test.ts:generic-api-key:470
+
+# Reviewed 2026-09-22: fixed credentials for disposable GitHub CI services and
+# the test which asserts those same synthetic constants. Not production keys.
+82b130efcb61a989d5c3a834c467e2f9d4bdf2e7:.github/workflows/ci.yml:generic-api-key:24
+82b130efcb61a989d5c3a834c467e2f9d4bdf2e7:.github/workflows/ci.yml:generic-api-key:26
+82b130efcb61a989d5c3a834c467e2f9d4bdf2e7:.github/workflows/release.yml:generic-api-key:25
+82b130efcb61a989d5c3a834c467e2f9d4bdf2e7:.github/workflows/release.yml:generic-api-key:27
+82b130efcb61a989d5c3a834c467e2f9d4bdf2e7:apps/api/test/release-workflow-supply-chain.test.ts:generic-api-key:19
+82b130efcb61a989d5c3a834c467e2f9d4bdf2e7:apps/api/test/release-workflow-supply-chain.test.ts:generic-api-key:21
+# Temporary fake backup environment (literal application-secret-2).
+2b8bb86b16bef8463bd522a6833a9b2df130d5b3:apps/api/test/instance-backup-restore.test.ts:generic-api-key:39
+# A synthetic calculation-row identifier, not an authentication credential.
+c7a057d7b63d26aa4b0b9e485e0889defaef096e:apps/api/test/fixtures/front-profit-complex-fixtures.ts:generic-api-key:89

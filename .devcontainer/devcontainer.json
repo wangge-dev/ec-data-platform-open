@@ -1,0 +1,40 @@
+{
+  "name": "ec-data-platform",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspaces/ec-data-platform",
+  "shutdownAction": "stopCompose",
+  "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/scripts/bootstrap.sh",
+  "postStartCommand": "bash .devcontainer/scripts/prepare-db.sh",
+  "waitFor": "postStartCommand",
+  "forwardPorts": [5173, 4000],
+  "portsAttributes": {
+    "5173": {
+      "label": "ec-data-platform Web",
+      "onAutoForward": "openBrowser"
+    },
+    "4000": {
+      "label": "ec-data-platform API",
+      "onAutoForward": "silent"
+    }
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}

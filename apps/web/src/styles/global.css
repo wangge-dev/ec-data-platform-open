@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-bg-base text-text-primary font-sans antialiased;
+    font-feature-settings: "cv02","cv03","cv04","cv11";
+  }
+  * { border-color: theme('colors.border.DEFAULT'); }
+}
+
+@layer components {
+  .card {
+    @apply bg-bg-card rounded-lg border p-6;
+    box-shadow: 0 1px 2px rgba(44, 40, 37, 0.04);
+  }
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-md text-text-secondary hover:bg-bg-subtle transition cursor-pointer;
+  }
+  .nav-item.active {
+    @apply text-white font-medium;
+  }
+}
+
+/* prose 简易版（替代 @tailwindcss/typography） */
+.prose h1 { @apply text-xl font-semibold mt-6 mb-3; }
+.prose h2 { @apply text-lg font-semibold mt-5 mb-2 pb-1 border-b; }
+.prose h3 { @apply text-base font-semibold mt-4 mb-2; }
+.prose p  { @apply my-2 leading-relaxed; }
+.prose ul { @apply list-disc pl-5 my-2; }
+.prose ol { @apply list-decimal pl-5 my-2; }
+.prose li { @apply my-1; }
+.prose strong { @apply font-semibold text-text-primary; }
+.prose code { @apply px-1.5 py-0.5 bg-bg-subtle rounded text-xs font-mono; }
+.prose pre { @apply p-3 bg-bg-subtle rounded-md overflow-x-auto my-3; }
+.prose pre code { @apply bg-transparent px-0; }
+.prose table { @apply w-full text-xs my-3 border-collapse; }
+.prose thead { @apply bg-bg-subtle; }
+.prose th, .prose td { @apply px-3 py-2 border text-left; }
+.prose th { @apply font-medium; }
+.prose blockquote { @apply pl-4 border-l-2 border-morandi-rose italic text-text-secondary my-3; }
+.prose a { @apply text-morandi-slate underline; }
+
+/* SVG 图表优先保持文字和刻度在高分屏、浏览器缩放下清晰。 */
+.echart-crisp,
+.echart-crisp > div,
+.echart-crisp svg,
+.echart-crisp canvas {
+  max-width: 100%;
+}
+.echart-crisp svg text {
+  text-rendering: geometricPrecision;
+}

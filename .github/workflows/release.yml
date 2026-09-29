@@ -1,0 +1,651 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify tagged revision
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      CI: "true"
+      POSTGRES_PASSWORD: CiPostgres7Rk2Vm9
+      APP_DB_PASSWORD: CiAppDb8Qw4Nz6Ty
+      ADMIN_PASSWORD: CiAdmin9Lp5Xs3Ku
+      JWT_SECRET: CiJwt7Fh2Qm9Vr4Nz6Ty8Kp3Ws5Ld1Xc
+    services:
+      postgres:
+        image: postgres:16@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b
+        env:
+          POSTGRES_USER: ec
+          POSTGRES_PASSWORD: CiPostgres7Rk2Vm9
+          POSTGRES_DB: ec_data
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ec -d ec_data"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 20
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.9 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify pinned SheetJS artifact
+        run: pnpm verify:sheetjs
+
+      - name: Audit runtime and development dependencies
+        run: pnpm audit:all
+
+      - name: Prepare isolated PostgreSQL integration database
+        shell: bash
+        env:
+          MIGRATION_DATABASE_URL: postgres://ec:CiPostgres7Rk2Vm9@127.0.0.1:5432/ec_data
+        run: |
+          set -euo pipefail
+          pnpm --filter @ec/api exec node --input-type=module <<'NODE'
+          import postgres from "postgres";
+          const admin = postgres(process.env.MIGRATION_DATABASE_URL, { max: 1 });
+          try {
+            const [row] = await admin.unsafe(
+              "SELECT format('CREATE ROLE ec_app LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE', $1::text) AS command",
+              [process.env.APP_DB_PASSWORD],
+            );
+            await admin.unsafe(row.command);
+          } finally {
+            await admin.end();
+          }
+          NODE
+          pnpm --filter @ec/api exec tsx scripts/migrate.ts
+
+      - name: Run real front-profit advisory-lock integration
+        env:
+          RUN_DB_TESTS: "1"
+          TEST_DATABASE_URL: postgres://ec_app:CiAppDb8Qw4Nz6Ty@127.0.0.1:5432/ec_data
+        run: pnpm --filter @ec/api exec vitest run test/front-profit-advisory-lock.integration.test.ts --maxWorkers=1
+
+      - name: Check public repository boundaries
+        run: pnpm repo:check:public
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run API unit tests
+        run: pnpm test:api
+
+      - name: Run Web unit tests
+        run: pnpm test:web
+
+      - name: Build applications
+        run: pnpm build
+
+  release:
+    name: Build, verify, and publish public release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    permissions:
+      contents: write
+      packages: write
+    env:
+      DOCKER_BUILD_RECORD_UPLOAD: "false"
+      DOCKER_BUILD_SUMMARY: "false"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve lowercase registry repositories
+        id: registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          repository="${GITHUB_REPOSITORY,,}"
+          echo "api=ghcr.io/${repository}-api" >> "${GITHUB_OUTPUT}"
+          echo "web=ghcr.io/${repository}-web" >> "${GITHUB_OUTPUT}"
+
+      - name: Prepare API image metadata
+        id: api_meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+        with:
+          images: ${{ steps.registry.outputs.api }}
+          tags: |
+            type=sha,format=long,prefix=sha-
+          labels: |
+            org.opencontainers.image.title=ec-data-platform-api
+            org.opencontainers.image.description=ec-data-platform API image
+
+      - name: Build and push API image once
+        id: api_build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          platforms: linux/amd64
+          pull: true
+          push: true
+          tags: ${{ steps.api_meta.outputs.tags }}
+          labels: ${{ steps.api_meta.outputs.labels }}
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+          provenance: mode=max
+          sbom: true
+
+      - name: Prepare Web image metadata
+        id: web_meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+        with:
+          images: ${{ steps.registry.outputs.web }}
+          tags: |
+            type=sha,format=long,prefix=sha-
+          labels: |
+            org.opencontainers.image.title=ec-data-platform-web
+            org.opencontainers.image.description=ec-data-platform Web image
+
+      - name: Build and push Web image once
+        id: web_build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          platforms: linux/amd64
+          pull: true
+          push: true
+          tags: ${{ steps.web_meta.outputs.tags }}
+          labels: ${{ steps.web_meta.outputs.labels }}
+          build-args: |
+            NPM_REGISTRY=https://registry.npmjs.org
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+          provenance: mode=max
+          sbom: true
+
+      - name: Pull exact registry digests and create the canonical image archive
+        shell: bash
+        env:
+          API_REPOSITORY: ${{ steps.registry.outputs.api }}
+          API_DIGEST: ${{ steps.api_build.outputs.digest }}
+          WEB_REPOSITORY: ${{ steps.registry.outputs.web }}
+          WEB_DIGEST: ${{ steps.web_build.outputs.digest }}
+          POSTGRES_REPOSITORY: docker.io/library/postgres
+          POSTGRES_DIGEST: sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b
+          REDIS_REPOSITORY: docker.io/library/redis
+          REDIS_DIGEST: sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2
+          IMAGE_BUNDLE_ROOT: ${{ runner.temp }}/release-image-bundle
+        run: |
+          set -euo pipefail
+          digest_pattern='^sha256:[0-9a-f]{64}$'
+          [[ "${API_DIGEST}" =~ ${digest_pattern} ]]
+          [[ "${WEB_DIGEST}" =~ ${digest_pattern} ]]
+          [[ "${POSTGRES_DIGEST}" =~ ${digest_pattern} ]]
+          [[ "${REDIS_DIGEST}" =~ ${digest_pattern} ]]
+
+          api_reference="${API_REPOSITORY}@${API_DIGEST}"
+          web_reference="${WEB_REPOSITORY}@${WEB_DIGEST}"
+          postgres_reference="${POSTGRES_REPOSITORY}@${POSTGRES_DIGEST}"
+          redis_reference="${REDIS_REPOSITORY}@${REDIS_DIGEST}"
+          docker pull "${api_reference}"
+          docker pull "${web_reference}"
+          docker pull "${postgres_reference}"
+          docker pull "${redis_reference}"
+          docker tag "${api_reference}" deploy-api:latest
+          docker tag "${web_reference}" deploy-web:latest
+          docker tag "${postgres_reference}" postgres:16
+          docker tag "${redis_reference}" redis:7-alpine
+
+          mkdir -p "${IMAGE_BUNDLE_ROOT}"
+          archive="${IMAGE_BUNDLE_ROOT}/ec-data-images.tar"
+          docker save \
+            postgres:16 \
+            redis:7-alpine \
+            deploy-api:latest \
+            deploy-web:latest \
+            -o "${archive}"
+
+          export API_REFERENCE="${api_reference}"
+          export WEB_REFERENCE="${web_reference}"
+          export POSTGRES_REFERENCE="${postgres_reference}"
+          export REDIS_REFERENCE="${redis_reference}"
+          export API_IMAGE_ID="$(docker image inspect --format '{{.Id}}' deploy-api:latest)"
+          export WEB_IMAGE_ID="$(docker image inspect --format '{{.Id}}' deploy-web:latest)"
+          export POSTGRES_IMAGE_ID="$(docker image inspect --format '{{.Id}}' postgres:16)"
+          export REDIS_IMAGE_ID="$(docker image inspect --format '{{.Id}}' redis:7-alpine)"
+          export ARCHIVE_SHA256="$(sha256sum "${archive}" | awk '{print $1}')"
+          export PROVENANCE_PATH="${IMAGE_BUNDLE_ROOT}/image-provenance.json"
+
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const requireDigest = (value, label) => {
+            if (!/^sha256:[0-9a-f]{64}$/.test(value)) {
+              throw new Error(`${label} is not an immutable SHA-256 digest.`);
+            }
+            return value;
+          };
+          const requireImageId = (value, label) => requireDigest(value, `${label} image ID`);
+          const requireArchiveHash = (value) => {
+            if (!/^[0-9a-f]{64}$/.test(value)) throw new Error("Invalid image archive SHA-256.");
+            return value;
+          };
+          const apiDigest = requireDigest(process.env.API_DIGEST, "API registry digest");
+          const webDigest = requireDigest(process.env.WEB_DIGEST, "Web registry digest");
+          const postgresDigest = requireDigest(process.env.POSTGRES_DIGEST, "PostgreSQL registry digest");
+          const redisDigest = requireDigest(process.env.REDIS_DIGEST, "Redis registry digest");
+          const provenance = {
+            schemaVersion: 1,
+            sourceRevision: process.env.GITHUB_SHA,
+            archiveSha256: requireArchiveHash(process.env.ARCHIVE_SHA256),
+            images: {
+              "postgres:16": {
+                imageId: requireImageId(process.env.POSTGRES_IMAGE_ID, "PostgreSQL"),
+                registryRepository: process.env.POSTGRES_REPOSITORY,
+                digest: postgresDigest,
+                reference: process.env.POSTGRES_REFERENCE,
+              },
+              "redis:7-alpine": {
+                imageId: requireImageId(process.env.REDIS_IMAGE_ID, "Redis"),
+                registryRepository: process.env.REDIS_REPOSITORY,
+                digest: redisDigest,
+                reference: process.env.REDIS_REFERENCE,
+              },
+              "deploy-api:latest": {
+                imageId: requireImageId(process.env.API_IMAGE_ID, "API"),
+                registryRepository: process.env.API_REPOSITORY,
+                digest: apiDigest,
+                reference: process.env.API_REFERENCE,
+              },
+              "deploy-web:latest": {
+                imageId: requireImageId(process.env.WEB_IMAGE_ID, "Web"),
+                registryRepository: process.env.WEB_REPOSITORY,
+                digest: webDigest,
+                reference: process.env.WEB_REFERENCE,
+              },
+            },
+          };
+          for (const tag of ["postgres:16", "redis:7-alpine", "deploy-api:latest", "deploy-web:latest"]) {
+            const entry = provenance.images[tag];
+            if (entry.reference !== `${entry.registryRepository}@${entry.digest}`) {
+              throw new Error(`${tag} immutable reference does not match its registry digest.`);
+            }
+          }
+          fs.writeFileSync(process.env.PROVENANCE_PATH, `${JSON.stringify(provenance, null, 2)}\n`, "utf8");
+          NODE
+
+          (
+            cd "${IMAGE_BUNDLE_ROOT}"
+            sha256sum ec-data-images.tar image-provenance.json \
+              > IMAGE-BUNDLE-SHA256SUMS.txt
+          )
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 20
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        shell: bash
+        run: |
+          corepack enable
+          corepack prepare pnpm@9.15.9 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify canonical image bundle before packaging
+        shell: bash
+        working-directory: ${{ runner.temp }}/release-image-bundle
+        run: |
+          set -euo pipefail
+          sha256sum --check IMAGE-BUNDLE-SHA256SUMS.txt
+
+      - name: Build and audit offline package
+        env:
+          RELEASE_ROOT: ${{ runner.temp }}/release
+          PREBUILT_IMAGE_ARCHIVE: ${{ runner.temp }}/release-image-bundle/ec-data-images.tar
+          PREBUILT_IMAGE_PROVENANCE: ${{ runner.temp }}/release-image-bundle/image-provenance.json
+        run: bash scripts/package-release.sh
+
+      - name: Build ecommerce workbench companion package
+        shell: pwsh
+        run: |
+          ./scripts/package-ecommerce-workbench.ps1 `
+            -OutputPath "$env:RUNNER_TEMP/release/ecommerce-workbench-v1.zip"
+
+      - name: Verify and build cloud server companion package
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS='=' read -r name _; do
+            if [[ "${name}" == DOCKER_* || "${name}" == COMPOSE_* ]]; then
+              unset "${name}"
+            fi
+          done < <(env)
+          bash -n cloud-kit/install-ubuntu.sh
+          CLOUD_DOCKER_TESTS=1 python3 scripts/test-cloud-kit.py
+          python3 scripts/cloud-gateway-smoke.py
+          python3 scripts/package-cloud-kit.py \
+            --output "${RUNNER_TEMP}/release/ec-cloud-kit.zip" \
+            --source-revision "${GITHUB_SHA}" \
+            --release-tag "${GITHUB_REF_NAME}"
+
+      - name: Generate verifiable release metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t archives < <(find "${RUNNER_TEMP}/release" -maxdepth 1 -type f -name 'ec-data-platform-*.zip' -print)
+          [[ ${#archives[@]} -eq 1 ]]
+          archive="${archives[0]}"
+          mapfile -t image_entries < <(unzip -Z1 "${archive}" | grep '/ec-data-images.tar$')
+          mapfile -t provenance_entries < <(unzip -Z1 "${archive}" | grep '/image-provenance.json$')
+          [[ ${#image_entries[@]} -eq 1 ]]
+          [[ ${#provenance_entries[@]} -eq 1 ]]
+
+          unzip -p "${archive}" "${image_entries[0]}" > "${RUNNER_TEMP}/release/embedded-images.tar"
+          unzip -p "${archive}" "${provenance_entries[0]}" > "${RUNNER_TEMP}/release/embedded-image-provenance.json"
+          cmp \
+            "${RUNNER_TEMP}/release-image-bundle/image-provenance.json" \
+            "${RUNNER_TEMP}/release/embedded-image-provenance.json"
+          cp \
+            "${RUNNER_TEMP}/release-image-bundle/image-provenance.json" \
+            "${RUNNER_TEMP}/release/image-provenance.json"
+          unzip -p "${archive}" '*/release-manifest.json' > "${RUNNER_TEMP}/release/release-manifest.json"
+          unzip -p "${RUNNER_TEMP}/release/ec-cloud-kit.zip" \
+            'ec-cloud-kit/cloud-kit-manifest.json' \
+            > "${RUNNER_TEMP}/release/cloud-kit-manifest.json"
+          export EMBEDDED_ARCHIVE_SHA256="$(sha256sum "${RUNNER_TEMP}/release/embedded-images.tar" | awk '{print $1}')"
+          MANIFEST_PATH="${RUNNER_TEMP}/release/release-manifest.json" \
+          PROVENANCE_PATH="${RUNNER_TEMP}/release/image-provenance.json" \
+          CLOUD_MANIFEST_PATH="${RUNNER_TEMP}/release/cloud-kit-manifest.json" \
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const manifest = JSON.parse(fs.readFileSync(process.env.MANIFEST_PATH, "utf8"));
+            const provenance = JSON.parse(fs.readFileSync(process.env.PROVENANCE_PATH, "utf8"));
+            const cloud = JSON.parse(fs.readFileSync(process.env.CLOUD_MANIFEST_PATH, "utf8"));
+            if (manifest.sourceRevision !== process.env.GITHUB_SHA) {
+              throw new Error("Manifest revision " + manifest.sourceRevision + " does not match " + process.env.GITHUB_SHA);
+            }
+            if (provenance.sourceRevision !== process.env.GITHUB_SHA) {
+              throw new Error("Image provenance revision does not match the tagged revision.");
+            }
+            if (provenance.archiveSha256 !== process.env.EMBEDDED_ARCHIVE_SHA256) {
+              throw new Error("Embedded image archive does not match image provenance.");
+            }
+            if (cloud.name !== "ec-cloud-kit" || cloud.sourceRevision !== process.env.GITHUB_SHA ||
+                cloud.releaseTag !== process.env.GITHUB_REF_NAME) {
+              throw new Error("Cloud kit provenance does not match the tagged revision.");
+            }
+            for (const tag of ["postgres:16", "redis:7-alpine", "deploy-api:latest", "deploy-web:latest"]) {
+              if (manifest.imageIds?.[tag] !== provenance.images?.[tag]?.imageId) {
+                throw new Error(`Manifest image ID does not match exact-digest provenance for ${tag}.`);
+              }
+            }
+          '
+          rm -f "${RUNNER_TEMP}/release/embedded-images.tar" "${RUNNER_TEMP}/release/embedded-image-provenance.json"
+          (
+            cd "${RUNNER_TEMP}/release"
+            sha256sum \
+              "$(basename "${archive}")" \
+              ecommerce-workbench-v1.zip \
+              ec-cloud-kit.zip \
+              cloud-kit-manifest.json \
+              image-provenance.json \
+              release-manifest.json \
+              > SHA256SUMS.txt
+          )
+
+      - name: Verify exact-digest provenance before smoke
+        shell: bash
+        working-directory: ${{ runner.temp }}/release
+        run: |
+          set -euo pipefail
+          sha256sum --check SHA256SUMS.txt
+          test -f ecommerce-workbench-v1.zip
+          test -f ec-cloud-kit.zip
+          test -f cloud-kit-manifest.json
+          mapfile -t archives < <(find . -maxdepth 1 -type f -name 'ec-data-platform-*.zip' -print)
+          [[ ${#archives[@]} -eq 1 ]]
+          archive="${archives[0]}"
+          mapfile -t image_entries < <(unzip -Z1 "${archive}" | grep '/ec-data-images.tar$')
+          mapfile -t provenance_entries < <(unzip -Z1 "${archive}" | grep '/image-provenance.json$')
+          [[ ${#image_entries[@]} -eq 1 ]]
+          [[ ${#provenance_entries[@]} -eq 1 ]]
+
+          unzip -p "${archive}" "${image_entries[0]}" > embedded-images.tar
+          unzip -p "${archive}" "${provenance_entries[0]}" > embedded-image-provenance.json
+          unzip -p ec-cloud-kit.zip 'ec-cloud-kit/cloud-kit-manifest.json' > embedded-cloud-kit-manifest.json
+          cmp image-provenance.json embedded-image-provenance.json
+          cmp cloud-kit-manifest.json embedded-cloud-kit-manifest.json
+          export EMBEDDED_ARCHIVE_SHA256="$(sha256sum embedded-images.tar | awk '{print $1}')"
+          MANIFEST_PATH=release-manifest.json \
+          PROVENANCE_PATH=image-provenance.json \
+          CLOUD_MANIFEST_PATH=cloud-kit-manifest.json \
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const manifest = JSON.parse(fs.readFileSync(process.env.MANIFEST_PATH, "utf8"));
+          const provenance = JSON.parse(fs.readFileSync(process.env.PROVENANCE_PATH, "utf8"));
+          const cloud = JSON.parse(fs.readFileSync(process.env.CLOUD_MANIFEST_PATH, "utf8"));
+          if (manifest.sourceRevision !== process.env.GITHUB_SHA || provenance.sourceRevision !== process.env.GITHUB_SHA) {
+            throw new Error("Offline package provenance does not match the tagged revision.");
+          }
+          if (cloud.name !== "ec-cloud-kit" || cloud.sourceRevision !== process.env.GITHUB_SHA ||
+              cloud.releaseTag !== process.env.GITHUB_REF_NAME) {
+            throw new Error("Cloud kit provenance does not match the tagged revision.");
+          }
+          if (manifest.imageSource !== "prebuilt-archive") {
+            throw new Error("Offline package was not produced from the canonical prebuilt archive.");
+          }
+          if (provenance.archiveSha256 !== process.env.EMBEDDED_ARCHIVE_SHA256) {
+            throw new Error("Smoke input archive does not match exact-digest provenance.");
+          }
+          for (const tag of ["postgres:16", "redis:7-alpine", "deploy-api:latest", "deploy-web:latest"]) {
+            if (manifest.imageIds?.[tag] !== provenance.images?.[tag]?.imageId) {
+              throw new Error(`Smoke input image ID does not match provenance for ${tag}.`);
+            }
+          }
+          for (const tag of ["postgres:16", "redis:7-alpine", "deploy-api:latest", "deploy-web:latest"]) {
+            const image = provenance.images?.[tag];
+            if (!image || !/^sha256:[0-9a-f]{64}$/.test(image.digest) || image.reference !== `${image.registryRepository}@${image.digest}`) {
+              throw new Error(`Smoke input does not have an immutable registry reference for ${tag}.`);
+            }
+          }
+          NODE
+          rm -f embedded-images.tar embedded-image-provenance.json embedded-cloud-kit-manifest.json
+
+      - name: Recreate front-profit module in an isolated empty database
+        shell: pwsh
+        run: |
+          $archive = Get-ChildItem -LiteralPath "$env:RUNNER_TEMP/release" -File -Filter 'ec-data-platform-*.zip' | Select-Object -First 1
+          if (-not $archive) { throw 'Offline release archive was not built.' }
+          ./scripts/verify-release.ps1 `
+            -ArchivePath $archive.FullName `
+            -WorkingRoot "$env:RUNNER_TEMP/release-verification" `
+            -PreserveEvidence `
+            -UsePublicTestCredentials
+
+      - name: Stage the seven verified public Release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          mkdir -p dist
+          mapfile -t archives < <(find "${RUNNER_TEMP}/release" -maxdepth 1 -type f -name 'ec-data-platform-*.zip' -print)
+          [[ ${#archives[@]} -eq 1 ]]
+          cp "${archives[0]}" dist/
+          cp \
+            "${RUNNER_TEMP}/release/ecommerce-workbench-v1.zip" \
+            "${RUNNER_TEMP}/release/ec-cloud-kit.zip" \
+            "${RUNNER_TEMP}/release/cloud-kit-manifest.json" \
+            "${RUNNER_TEMP}/release/SHA256SUMS.txt" \
+            "${RUNNER_TEMP}/release/release-manifest.json" \
+            "${RUNNER_TEMP}/release/image-provenance.json" \
+            dist/
+          [[ "$(find dist -maxdepth 1 -type f | wc -l)" -eq 7 ]]
+
+      - name: Resolve verified application image provenance
+        id: release_images
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROVENANCE_PATH=dist/image-provenance.json node --input-type=module <<'NODE' >> "${GITHUB_OUTPUT}"
+          import fs from "node:fs";
+
+          const provenance = JSON.parse(fs.readFileSync(process.env.PROVENANCE_PATH, "utf8"));
+          if (provenance.sourceRevision !== process.env.GITHUB_SHA) {
+            throw new Error("Release image provenance does not match the tagged revision.");
+          }
+          const outputNames = new Map([
+            ["deploy-api:latest", "api"],
+            ["deploy-web:latest", "web"],
+          ]);
+          for (const [tag, output] of outputNames) {
+            const image = provenance.images?.[tag];
+            if (!image || !/^[a-z0-9.-]+(?::[0-9]+)?\/[a-z0-9._/-]+$/.test(image.registryRepository) ||
+                !/^sha256:[0-9a-f]{64}$/.test(image.digest) ||
+                image.reference !== `${image.registryRepository}@${image.digest}`) {
+              throw new Error(`Invalid immutable registry provenance for ${tag}.`);
+            }
+            process.stdout.write(`${output}_repository=${image.registryRepository}\n`);
+            process.stdout.write(`${output}_digest=${image.digest}\n`);
+            process.stdout.write(`${output}_reference=${image.reference}\n`);
+          }
+          NODE
+
+      - name: Publish verified image tags and GitHub Release atomically
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          API_REPOSITORY: ${{ steps.release_images.outputs.api_repository }}
+          API_DIGEST: ${{ steps.release_images.outputs.api_digest }}
+          API_REFERENCE: ${{ steps.release_images.outputs.api_reference }}
+          WEB_REPOSITORY: ${{ steps.release_images.outputs.web_repository }}
+          WEB_DIGEST: ${{ steps.release_images.outputs.web_digest }}
+          WEB_REFERENCE: ${{ steps.release_images.outputs.web_reference }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_lookup=""
+          if release_lookup="$(gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" 2>&1)"; then
+            echo "Release ${GITHUB_REF_NAME} already exists; refusing to modify or overwrite it." >&2
+            exit 1
+          fi
+          if ! grep -Eqi 'release not found|HTTP 404: Not Found' <<< "${release_lookup}"; then
+            echo "Could not prove that Release ${GITHUB_REF_NAME} is absent; refusing to publish." >&2
+            printf '%s\n' "${release_lookup}" >&2
+            exit 1
+          fi
+          api_version_reference="${API_REPOSITORY}:${GITHUB_REF_NAME}"
+          web_version_reference="${WEB_REPOSITORY}:${GITHUB_REF_NAME}"
+          for reference in "${api_version_reference}" "${web_version_reference}"; do
+            registry_lookup=""
+            if registry_lookup="$(docker buildx imagetools inspect "${reference}" 2>&1)"; then
+              echo "Registry tag ${reference} already exists; refusing to overwrite it." >&2
+              exit 1
+            fi
+            if ! grep -Eqi 'not found|manifest unknown' <<< "${registry_lookup}"; then
+              echo "Could not prove that registry tag ${reference} is absent; refusing to publish." >&2
+              printf '%s\n' "${registry_lookup}" >&2
+              exit 1
+            fi
+          done
+
+          release_flags=(--draft)
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            release_flags+=(--prerelease)
+          fi
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --verify-tag \
+            --generate-notes \
+            --title "${GITHUB_REF_NAME}" \
+            "${release_flags[@]}"
+          gh release upload "${GITHUB_REF_NAME}" dist/* \
+            --repo "${GITHUB_REPOSITORY}"
+
+          release_assets_json="$(gh api \
+            "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+            --jq '[.[] | select(.tag_name == env.GITHUB_REF_NAME and .draft == true)] | if length != 1 then error("Expected exactly one draft Release for the tag.") else .[0].assets | map({name: .name, size: .size}) end')"
+          export RELEASE_ASSETS_JSON="${release_assets_json}"
+          RELEASE_DIST=dist node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import path from "node:path";
+
+          const expected = fs.readdirSync(process.env.RELEASE_DIST, { withFileTypes: true })
+            .filter((entry) => entry.isFile())
+            .map((entry) => ({
+              name: entry.name,
+              size: fs.statSync(path.join(process.env.RELEASE_DIST, entry.name)).size,
+            }))
+            .sort((left, right) => Buffer.from(left.name).compare(Buffer.from(right.name)));
+          const actual = JSON.parse(process.env.RELEASE_ASSETS_JSON)
+            .sort((left, right) => Buffer.from(left.name).compare(Buffer.from(right.name)));
+          if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+            throw new Error("Draft GitHub Release assets do not exactly match the verified local artifacts.");
+          }
+          NODE
+
+          docker buildx imagetools create \
+            --tag "${api_version_reference}" \
+            "${API_REFERENCE}"
+          docker buildx imagetools create \
+            --tag "${web_version_reference}" \
+            "${WEB_REFERENCE}"
+          actual_api_digest="sha256:$(docker buildx imagetools inspect --raw "${api_version_reference}" | sha256sum | awk '{print $1}')"
+          actual_web_digest="sha256:$(docker buildx imagetools inspect --raw "${web_version_reference}" | sha256sum | awk '{print $1}')"
+          if [[ "${actual_api_digest}" != "${API_DIGEST}" || "${actual_web_digest}" != "${WEB_DIGEST}" ]]; then
+            echo "Published version tag digest does not match the exact digest that passed smoke." >&2
+            exit 1
+          fi
+
+          visibility_flags=(--draft=false)
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            visibility_flags+=(--prerelease)
+          else
+            visibility_flags+=(--prerelease=false)
+          fi
+          gh release edit "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            "${visibility_flags[@]}"

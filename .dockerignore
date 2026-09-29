@@ -1,0 +1,57 @@
+# 构建时排除：避免 host 的依赖/产物污染镜像
+node_modules
+**/node_modules
+dist
+**/dist
+.git
+.codegraph/
+.worktrees/
+.env
+**/.env
+.env.*
+**/.env.*
+
+# Local acceptance output and archives must never enter the Docker build context.
+outputs/
+**/outputs/
+artifacts/
+apps/api/artifacts/
+apps/api/apps/
+front-profit-acceptance/
+front-profit-production-release/
+release/
+*.zip
+**/*.zip
+*.7z
+**/*.7z
+*.tar
+**/*.tar
+*.tgz
+**/*.tgz
+
+# 临时 / 编辑器
+.vscode
+.idea
+*.log
+.DS_Store
+
+# 部署目录自身不放进镜像
+deploy/
+
+# 文档和 spec（spec 是 MeData 逆向源码，有 IP 风险）
+docs/spec/
+docs/spec
+docs/对话收集/
+docs/部署指南.md
+PROGRESS.md
+README.md
+
+# 真实数据备份
+data/
+raw/
+*.xlsx
+*.csv
+
+# 临时脚本
+tmp_*.mjs
+*.tmp

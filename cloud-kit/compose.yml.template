@@ -1,0 +1,22 @@
+name: @@INSTANCE@@-edge
+services:
+  caddy:
+    image: @@CADDY_IMAGE@@
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+      - ./caddy-config:/config
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+  gateway:
+    image: @@NGINX_IMAGE@@
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}

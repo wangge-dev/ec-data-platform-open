@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "front-profit-production-release/v1",
+  "mode": "template",
+  "acceptanceResult": {
+    "path": "front-profit-acceptance/result.json",
+    "periods": ["2026-07", "2026-08"],
+    "resultGatePassed": false,
+    "acceptedDecision": "pending",
+    "productionReleaseAuthorizedInResult": false
+  },
+  "authorization": {
+    "authorized": false,
+    "authorizedAt": "2026-08-10T00:00:00Z",
+    "authorizer": "TBD",
+    "releaseOwner": "TBD",
+    "rollbackOwner": "TBD",
+    "observer": "TBD",
+    "purpose": "front-profit-production-release",
+    "approvalRef": "TBD",
+    "confirmSeparateFromDryRun": false
+  },
+  "scope": {
+    "rolloutMode": "initial_single_platform",
+    "periods": ["2026-08"],
+    "platforms": ["TBD"],
+    "authority": "auto",
+    "observationDays": 7,
+    "releaseWindow": {
+      "startsAt": "2026-08-10T00:00:00Z",
+      "endsAt": "2026-08-10T01:00:00Z"
+    },
+    "observationWindow": {
+      "startsAt": "2026-08-10T01:00:00Z",
+      "endsAt": "2026-08-17T01:00:00Z"
+    }
+  },
+  "technicalGates": {
+    "apiTypecheckPassed": false,
+    "apiVitestPassed": false,
+    "webTypecheckPassed": false,
+    "webBuildPassed": false,
+    "repoCheckPassed": false,
+    "freshMigrationPassed": false,
+    "publishIdempotencySmokePassed": false,
+    "rollbackSmokePassed": false,
+    "capacityMatrixPassed": false,
+    "acceptanceResultPassed": false,
+    "adminManualReviewed": false,
+    "uiSmokePassed": false
+  },
+  "releaseArtifacts": {
+    "commitSha": "0000000000000000000000000000000000000000",
+    "targetImageTag": "TBD",
+    "targetImageDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "dockerPackageManifest": "front-profit-production-release/docker-package-manifest.json",
+    "capacityMatrixResult": "apps/api/artifacts/front-profit-capacity-matrix-db-gate-20260811/capacity-matrix-result.json",
+    "migrationList": [
+      "0005_complex_job_framework.sql",
+      "0006_period_authority.sql",
+      "0007_publish_sources_and_front_profit_rows.sql",
+      "0008_front_profit_layer_skeleton.sql",
+      "0009_front_profit_business_rule_skeleton.sql"
+    ],
+    "rollbackTargetVersionId": 1,
+    "backupReference": "TBD",
+    "currentConfigReference": "TBD"
+  },
+  "operations": {
+    "releaseChecklistReviewed": false,
+    "rollbackPlanReviewed": false,
+    "monitorOwner": "TBD",
+    "incidentChannel": "TBD",
+    "fallbackDecisionAt": "2026-08-10T02:00:00Z"
+  },
+  "evidenceArtifacts": [
+    {
+      "kind": "acceptance_result",
+      "path": "front-profit-acceptance/result.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    },
+    {
+      "kind": "backup_record",
+      "path": "front-profit-production-release/backup-record.json",
+      "containsSampleRows": false,
+      "containsCredentials": false
+    }
+  ],
+  "confirmations": {
+    "noCredentialsInManifest": true,
+    "noSampleRowsInManifest": true,
+    "noProductionDbCredentialsStored": true,
+    "noCiRealSampleDependency": true,
+    "noAutomaticDeployment": true,
+    "productionReleaseIsExplicitlyAuthorized": false
+  }
+}

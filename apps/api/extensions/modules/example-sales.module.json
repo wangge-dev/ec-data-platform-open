@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "module-manifest/v1",
+  "module": {
+    "code": "example_sales",
+    "name": "示例销售",
+    "category": "diy",
+    "categoryLabel": "DIY 模块",
+    "description": "纯配置普通销售模块示例，不包含可执行 transform。",
+    "columns": [
+      {
+        "name": "occurred_on",
+        "source": ["日期", "occurred_on"],
+        "type": "date",
+        "required": true,
+        "label": "日期",
+        "semanticRole": "time"
+      },
+      {
+        "name": "channel",
+        "source": ["渠道", "channel"],
+        "type": "text",
+        "label": "渠道",
+        "semanticRole": "dimension"
+      },
+      {
+        "name": "sales_amount",
+        "source": ["销售额", "sales_amount"],
+        "type": "numeric",
+        "required": true,
+        "label": "销售额",
+        "semanticRole": "amount"
+      }
+    ],
+    "platforms": [
+      {
+        "code": "generic",
+        "name": "通用导出",
+        "filePattern": "销售|sales",
+        "patternFlags": "i",
+        "enabled": true
+      }
+    ],
+    "timeKey": "occurred_on",
+    "usages": ["summary", "ai_chart", "ai_analysis"],
+    "enabled": true,
+    "hasTransform": false,
+    "semanticModel": {
+      "schemaVersion": "semantic-manifest/v1",
+      "id": "example_sales.analysis",
+      "version": 1,
+      "dimensions": [
+        {
+          "id": "example_sales.date",
+          "label": "日期",
+          "field": "occurred_on",
+          "kind": "time"
+        },
+        {
+          "id": "example_sales.channel",
+          "label": "渠道",
+          "field": "channel",
+          "kind": "categorical"
+        }
+      ],
+      "metrics": [
+        {
+          "id": "example_sales.sales_amount",
+          "label": "销售额",
+          "aggregation": "sum",
+          "field": "sales_amount",
+          "unit": "currency",
+          "additiveAcrossTime": true
+        },
+        {
+          "id": "example_sales.row_count",
+          "label": "记录数",
+          "aggregation": "count",
+          "unit": "number",
+          "additiveAcrossTime": true
+        }
+      ]
+    },
+    "presets": [
+      {
+        "key": "sales_trend",
+        "label": "销售额趋势",
+        "target": "compare",
+        "metricId": "example_sales.sales_amount",
+        "dimensionId": "example_sales.date",
+        "period": "mom",
+        "emphasis": "info"
+      }
+    ]
+  }
+}

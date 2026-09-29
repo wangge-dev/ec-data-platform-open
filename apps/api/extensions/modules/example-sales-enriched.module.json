@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "module-manifest/v1",
+  "module": {
+    "code": "example_sales_enriched",
+    "name": "示例销售利润",
+    "category": "diy",
+    "categoryLabel": "DIY 模块",
+    "description": "演示受限字典关联和安全计算字段的纯配置模块，不携带数据或可执行 transform。",
+    "columns": [
+      {
+        "name": "occurred_on",
+        "source": ["日期", "occurred_on"],
+        "type": "date",
+        "required": true,
+        "label": "日期",
+        "semanticRole": "time"
+      },
+      {
+        "name": "product_id",
+        "source": ["商品ID", "商品编码", "product_id"],
+        "type": "text",
+        "required": true,
+        "label": "商品ID",
+        "semanticRole": "product_id"
+      },
+      {
+        "name": "revenue",
+        "source": ["销售额", "revenue"],
+        "type": "numeric",
+        "required": true,
+        "label": "销售额",
+        "semanticRole": "amount"
+      },
+      {
+        "name": "cost",
+        "source": ["成本", "cost"],
+        "type": "numeric",
+        "required": true,
+        "label": "成本"
+      },
+      {
+        "name": "gross_profit",
+        "type": "numeric",
+        "label": "毛利",
+        "computed": true,
+        "expression": "\"revenue\" - \"cost\""
+      }
+    ],
+    "platforms": [
+      {
+        "code": "generic",
+        "name": "通用销售导出",
+        "filePattern": "销售利润|sales_profit",
+        "patternFlags": "i",
+        "enabled": true
+      }
+    ],
+    "join": {
+      "dictRole": "brand_dict",
+      "on": {
+        "product_id": "id"
+      },
+      "enrich": {
+        "brand": "品牌",
+        "shop": "店铺"
+      },
+      "label": "商品主数据关联"
+    },
+    "timeKey": "occurred_on",
+    "usages": ["summary", "ai_chart", "ai_analysis"],
+    "enabled": true,
+    "hasTransform": false,
+    "semanticModel": {
+      "schemaVersion": "semantic-manifest/v1",
+      "id": "example_sales_enriched.analysis",
+      "version": 1,
+      "dimensions": [
+        {
+          "id": "example_sales_enriched.date",
+          "label": "日期",
+          "field": "occurred_on",
+          "kind": "time"
+        },
+        {
+          "id": "example_sales_enriched.product",
+          "label": "商品",
+          "field": "product_id",
+          "kind": "categorical"
+        },
+        {
+          "id": "example_sales_enriched.brand",
+          "label": "品牌",
+          "field": "brand",
+          "kind": "categorical"
+        },
+        {
+          "id": "example_sales_enriched.shop",
+          "label": "店铺",
+          "field": "shop",
+          "kind": "categorical"
+        }
+      ],
+      "metrics": [
+        {
+          "id": "example_sales_enriched.revenue",
+          "label": "销售额",
+          "aggregation": "sum",
+          "field": "revenue",
+          "unit": "currency",
+          "additiveAcrossTime": true
+        },
+        {
+          "id": "example_sales_enriched.cost",
+          "label": "成本",
+          "aggregation": "sum",
+          "field": "cost",
+          "unit": "currency",
+          "additiveAcrossTime": true
+        },
+        {
+          "id": "example_sales_enriched.gross_profit",
+          "label": "毛利",
+          "aggregation": "sum",
+          "field": "gross_profit",
+          "unit": "currency",
+          "additiveAcrossTime": true
+        }
+      ]
+    }
+  }
+}
