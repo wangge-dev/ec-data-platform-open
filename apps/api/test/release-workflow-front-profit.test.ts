@@ -18,7 +18,7 @@ describe("release workflow front-profit gate", () => {
     expect(workflow).toContain("-UsePublicTestCredentials");
 
     const releaseJob = workflow.slice(workflow.indexOf("  release:"));
-    expect(releaseJob).toContain("Stage the seven verified private Release assets");
+    expect(releaseJob).toContain("Stage the seven verified public Release assets");
     expect(releaseJob).not.toContain("actions/upload-artifact@");
     expect(releaseJob).not.toContain("actions/download-artifact@");
     expect(releaseJob.indexOf("./scripts/verify-release.ps1")).toBeLessThan(
