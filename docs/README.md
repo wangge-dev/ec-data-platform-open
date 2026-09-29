@@ -4,6 +4,7 @@
 
 | 你要做什么 | 从这里开始 |
 |---|---|
+| 第一次用 GitHub，找安装包并在电脑上启动 | [从 GitHub 下载、首次启动与 DIY](GETTING_STARTED.md) |
 | 认识产品、日常上传与看结果 | [给人看的使用手册](USER_GUIDE.md) |
 | 从源码用 Docker 安装或升级 | [部署指南](部署指南.md) |
 | 看技术实现、开发与交付边界 | [技术与交付说明](TECHNICAL_OVERVIEW.md) |

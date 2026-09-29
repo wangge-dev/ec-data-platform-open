@@ -6,7 +6,7 @@
 
 这是一套面向可信电商团队的本地或单租户数据工作台。它从 Excel/CSV 开始：保留原始记录，按业务规则处理，再查看模块指标、分析提醒和图表。重点不是再做一张 Excel，而是把核对过的字段和统计口径留给下一批同类报表。
 
-[下载最新版离线包](https://github.com/wangge-dev/ec-data-platform-open/releases/latest) · [新手使用手册](docs/USER_GUIDE.md) · [文档导航](docs/README.md)
+[从 GitHub 下载并首次启动](docs/GETTING_STARTED.md) · [下载最新版离线包](https://github.com/wangge-dev/ec-data-platform-open/releases/latest) · [新手使用手册](docs/USER_GUIDE.md) · [文档导航](docs/README.md)
 
 ## 先用现成模块，再按自己的报表调整
 
@@ -42,7 +42,7 @@
 
 | 你想做什么 | 入口 |
 |---|---|
-| 在自己电脑上使用 | 下载[正式 Release 离线包](https://github.com/wangge-dev/ec-data-platform-open/releases/latest)，按[新手手册](docs/USER_GUIDE.md)安装；需要 Docker |
+| 在自己电脑上使用 | 先看[GitHub 下载与首次启动](docs/GETTING_STARTED.md)，再按[新手手册](docs/USER_GUIDE.md)安装；需要 Docker |
 | 团队已有部署地址 | 直接用浏览器访问；普通运营人员不必安装 Docker |
 | 自己搭建或二次开发 | 看[源码部署指南](docs/部署指南.md)与[技术与交付说明](docs/TECHNICAL_OVERVIEW.md) |
 | 复用或扩展业务模块 | 从[页面自助建模块](docs/SELF_SERVICE_MODULES.md)开始；复杂改造再看[AI DIY 指南](docs/AI_DIY_GUIDE.md) |
