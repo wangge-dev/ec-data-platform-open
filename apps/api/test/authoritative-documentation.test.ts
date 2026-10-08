@@ -32,10 +32,12 @@ describe("public documentation contracts", () => {
   });
 
   test("links public licensing and keeps business data outside the release", () => {
-    expect(readRoot("LICENSE")).toContain("GNU GENERAL PUBLIC LICENSE");
-    expect(readRoot("README.md")).toContain("GPL-3.0-only");
-    expect(readRoot("docs/TECHNICAL_OVERVIEW.md")).toContain("GPL-3.0-only");
-    expect(readRoot("docs/README.md")).toContain("GPL-3.0-only");
+    expect(readRoot("LICENSE")).toContain("MIT License");
+    expect(readRoot("LICENSE")).toContain("Copyright (c) 2026 wangge-dev");
+    expect(readRoot("LICENSE")).toContain("The above copyright notice and this permission notice shall be included");
+    expect(readRoot("README.md")).toContain("MIT");
+    expect(readRoot("docs/TECHNICAL_OVERVIEW.md")).toContain("MIT");
+    expect(readRoot("docs/README.md")).toContain("MIT");
     expect(readRoot("docs/USER_GUIDE.md")).toContain("公开仓库");
     expect(readRoot("SECURITY.md")).toContain("synthetic or properly sanitized");
     for (const path of ["README.md", "docs/USER_GUIDE.md", "docs/AI_DIY_GUIDE.md", "docs/AI_PROMPTS.md"]) {
@@ -52,5 +54,24 @@ describe("public documentation contracts", () => {
     expect(technicalOverview).toContain("不是通用 BI 语义模型");
     expect(readme).toContain("不代替财务结账");
     expect(index).toContain("前台利润自动归集仍需真实样本和生产发布验收");
+  });
+
+  test("ships MIT consistently without stripping upstream notices", () => {
+    for (const path of ["package.json", "apps/api/package.json", "apps/web/package.json"]) {
+      expect(JSON.parse(readRoot(path)).license, path).toBe("MIT");
+    }
+    for (const path of ["scripts/package-release.ps1", "scripts/package-release.sh",
+      "cloud-kit/README.md", "templates/ecommerce-workbench/README.md"]) {
+      expect(readRoot(path), path).toContain("MIT");
+      expect(readRoot(path), path).not.toContain("GPL-3.0-only");
+      expect(readRoot(path), path).toContain("THIRD_PARTY_NOTICES.md");
+    }
+    expect(readRoot("README.md")).toContain("无需作者另行批准");
+    expect(readRoot("docs/USER_GUIDE.md")).toContain("保留版权与许可声明");
+    expect(readRoot("patches/braces.LICENSE")).toContain("Jon Schlinkert");
+    for (const path of ["apps/api/Dockerfile", "apps/web/Dockerfile"]) {
+      expect(readRoot(path), path).toContain('LABEL org.opencontainers.image.licenses="MIT"');
+      expect(readRoot(path), path).toContain("COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/ec-data-platform/");
+    }
   });
 });

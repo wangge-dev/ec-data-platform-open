@@ -39,6 +39,9 @@ WORKDIR /app/apps/api
 
 ENV NODE_ENV=production
 
+LABEL org.opencontainers.image.licenses="MIT"
+COPY LICENSE THIRD_PARTY_NOTICES.md /usr/share/licenses/ec-data-platform/
+
 COPY --from=builder --chown=node:node /prod/apps/api/ ./
 
 # Re-run the runtime-closure assertion after the final-stage copy.  This makes

@@ -524,7 +524,7 @@ Existing installation? Do not launch a second copy. Back up and follow the upgra
 Every startup imports `ec-data-images.tar`, verifies its image IDs against `release-image-ids.txt` (cross-audited with `release-manifest.json` during packaging), and recreates containers from those verified images.
 See `docs/离线包使用说明.md`. Sanitized front-profit templates are under `templates/front-profit/`; portable module, connector, and vertical-solution manifests are under `apps/api/extensions/`.
 This package contains no complete source tree, secrets, or real business data.
-Project-owned code is distributed under GNU GPL-3.0-only; see LICENSE. Third-party terms are summarized in THIRD_PARTY_NOTICES.md. The corresponding complete source is available at https://github.com/wangge-dev/ec-data-platform-open at the sourceRevision recorded in release-manifest.json. This package never authorizes sharing a user's real business data or secrets.
+Project-owned code is distributed under MIT; see LICENSE. Third-party terms are summarized in THIRD_PARTY_NOTICES.md. The corresponding complete source is available at https://github.com/wangge-dev/ec-data-platform-open at the sourceRevision recorded in release-manifest.json. This package never authorizes sharing a user's real business data or secrets.
 '@
   Write-Utf8NoBom (Join-Path $distRoot 'README.md') $readme
 

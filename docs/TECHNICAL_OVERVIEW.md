@@ -16,7 +16,7 @@
 
 ## 从公开源码首次启动
 
-本仓库自有代码使用 [GPL-3.0-only](../LICENSE)，第三方组件和示例素材保留各自许可，见[第三方说明](../THIRD_PARTY_NOTICES.md)。公开源码不包含业务数据库、真实经营报表或密钥。正式入口是 Docker Compose；它面向本地或可信单租户部署，不是直接对公网开放的多租户 SaaS。
+本仓库自有代码使用 [MIT](../LICENSE)，第三方组件和示例素材保留各自许可，见[第三方说明](../THIRD_PARTY_NOTICES.md)。公开源码不包含业务数据库、真实经营报表或密钥。正式入口是 Docker Compose；它面向本地或可信单租户部署，不是直接对公网开放的多租户 SaaS。
 
 要求 Docker Desktop 已启动。Compose 为避免离线包意外联网，把五个服务固定为 `pull_policy: never`；所以从源码第一次启动时，需要先取得基础镜像并构建应用镜像。
 
@@ -67,7 +67,7 @@ templates/      脱敏或固定合成的业务模板
 
 | 交付物 | 用途与边界 |
 |---|---|
-| 离线运行包 | `scripts/package-release.ps1` 生成不含密钥和业务数据的运行包。默认先跑前台利润本地合成预检；`syntheticRehearsal=allowed` 只说明合成演练，不代表真实业务验收或生产授权。分发时提供对应源码、GPL 与第三方许可信息。 |
+| 离线运行包 | `scripts/package-release.ps1` 生成不含密钥和业务数据的运行包。默认先跑前台利润本地合成预检；`syntheticRehearsal=allowed` 只说明合成演练，不代表真实业务验收或生产授权。分发时提供对应源码、MIT 与第三方许可信息。 |
 | 电商工作台配置包 | `scripts/package-ecommerce-workbench.ps1` 生成七表四入口的纯配置与固定合成样例，不是平台离线运行底包，也不含原始导出转换器。 |
 | 实例备份 | 源码树使用 `scripts/instance-backup.*` / `scripts/instance-restore.*`，离线包使用根目录 `backup.*` / `restore.*`。备份含真实业务数据和敏感信息，需限权、加密、异机保存，并实际演练恢复；绝不能上传仓库、Issue 或 Release。 |
 | 换机开发包 | `scripts/package-development-handoff.ps1` 生成 Git bundle；只有显式加 `-IncludeDatabaseBackup` 才会包含数据库备份。 |

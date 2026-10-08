@@ -519,7 +519,7 @@ cat > "${DIST_PATH}/README.md" <<'EOF'
 每次启动都会导入 `ec-data-images.tar`、按打包阶段与 `release-manifest.json` 交叉审计过的 `release-image-ids.txt` 核对镜像 ID，并使用已核验镜像重建容器。
 脱敏前台利润模板位于 `templates/front-profit/`。
 完整说明见 `docs/离线包使用说明.md`。模块、连接器和垂直方案配置包位于 `apps/api/extensions/`；本包不含完整源码、密钥或真实业务数据。
-项目自有代码按 GPL-3.0-only 分发，见根目录 `LICENSE`；第三方许可见 `THIRD_PARTY_NOTICES.md`。与清单 `sourceRevision` 对应的完整源码位于 `https://github.com/wangge-dev/ec-data-platform-open`。本包不授权传播任何用户的真实经营数据、密钥或备份。
+项目自有代码按 MIT 分发，见根目录 `LICENSE`；第三方许可见 `THIRD_PARTY_NOTICES.md`。与清单 `sourceRevision` 对应的完整源码位于 `https://github.com/wangge-dev/ec-data-platform-open`。本包不授权传播任何用户的真实经营数据、密钥或备份。
 EOF
 
 cp scripts/release-start.ps1 "${DIST_PATH}/start.ps1"

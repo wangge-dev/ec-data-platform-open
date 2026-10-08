@@ -1,6 +1,6 @@
 # Security policy
 
-This repository is intended for public source distribution under GNU GPL-3.0-only. Public source visibility does not make a deployment safe for anonymous access or untrusted multi-tenant use.
+This repository is intended for public source distribution under MIT. Public source visibility does not make a deployment safe for anonymous access or untrusted multi-tenant use.
 
 ## Dependency review status (2026-10-08)
 
@@ -32,6 +32,6 @@ Report vulnerabilities through GitHub's private vulnerability reporting feature 
 
 ## Supported deployment boundary
 
-Project-owned source is licensed under [GPL-3.0-only](LICENSE). Third-party licenses remain applicable; see [third-party notices](THIRD_PARTY_NOTICES.md). Public issue reports and PRs must use synthetic or properly sanitized reproduction data.
+Project-owned source is licensed under [MIT](LICENSE). Third-party licenses remain applicable; see [third-party notices](THIRD_PARTY_NOTICES.md). Public issue reports and PRs must use synthetic or properly sanitized reproduction data.
 
 The current supported boundary is local use or a trusted, isolated single-tenant deployment. Public registration, shared-database multi-tenancy, and use as the sole authoritative financial system are not supported yet.

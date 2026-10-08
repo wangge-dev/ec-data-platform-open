@@ -32,7 +32,7 @@
 
 ## 发布与换机
 
-- 给使用者：`scripts/package-release.ps1`，产物不得包含业务数据或密钥，并须包含 GPL 与第三方许可说明；发布标签与公开源码修订必须和离线包清单一致。
+- 给使用者：`scripts/package-release.ps1`，产物不得包含业务数据或密钥，并须包含 MIT 与第三方许可说明；发布标签与公开源码修订必须和离线包清单一致。
 - 换机开发：`scripts/package-development-handoff.ps1`；数据库备份属于敏感资产，只能显式选择。
 - 当前发布事实以 `release-manifest.json`、验证器结果和当前 Git 提交为准，不以旧验收记录代替。
 - GitHub Actions/GHCR 不得包含业务数据库或真实上传文件；单租户云部署须按 `cloud-kit/README.md` 完成目标机安全、备份与恢复验收，不能把本机测试当公网生产验收。
