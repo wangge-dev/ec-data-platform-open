@@ -1,1 +1,3 @@
 *.sh text eol=lf
+# Patch context lines intentionally contain a space; keep patch bytes portable.
+patches/*.patch text eol=lf whitespace=-blank-at-eol
