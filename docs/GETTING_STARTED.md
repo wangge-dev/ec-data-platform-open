@@ -11,6 +11,20 @@
 | 在页面增加普通单表模块 | 已运行的中台和脱敏样表 | 看[自助建模块说明](SELF_SERVICE_MODULES.md)，先不用改源码 |
 | 让 Codex 修改复杂模块或程序 | 与运行版本对应的完整公开源码 | 看[给 AI 的接手与 DIY 指南](AI_DIY_GUIDE.md)及[可复制提示词](AI_PROMPTS.md) |
 
+## 不想自己研究？让 AI 带你开始
+
+把下面整段复制给 ChatGPT 或 Codex；已有具体目标时，在末尾加一句说明。
+
+```text
+请帮我使用 https://github.com/wangge-dev/ec-data-platform-open 。
+先读取 docs/AI_PROMPTS.md 的「0. 把仓库交给 AI」，按其中说明接手。
+默认先帮我安装正式版本并用合成样例验证，再按我的报表做 DIY。
+先确认你的操作能力、我的电脑环境和已有实例；没有本机工具就分步指导我。
+无法读取仓库就请我提供文档，不要猜测；不要索要密码或真实业务数据。
+```
+
+[完整提示词](AI_PROMPTS.md#0-把仓库交给-ai直接复制)可直接复制，不需要先填技术参数。网页版 AI 只能在具备相应工具时读取网页，不能代替本机安装；能操作本机的 Codex 也需要你授权具体任务。先分清自己要安装、使用还是开发，不把仓库地址当成已经运行的服务地址。
+
 ## 一、找到真正的安装包
 
 1. 打开[公开仓库](https://github.com/wangge-dev/ec-data-platform-open)，点击首页的“下载最新版离线包”；也可以直接打开 [Releases 页面](https://github.com/wangge-dev/ec-data-platform-open/releases/latest)。

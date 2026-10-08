@@ -8,6 +8,20 @@
 
 [从 GitHub 下载并首次启动](docs/GETTING_STARTED.md) · [下载最新版离线包](https://github.com/wangge-dev/ec-data-platform-open/releases/latest) · [新手使用手册](docs/USER_GUIDE.md) · [文档导航](docs/README.md)
 
+## 不知道从哪里开始？把仓库交给 AI
+
+复制下面这段到 ChatGPT 或 Codex，让它先读说明，再带你安装或 DIY。[完整接手提示词与专项模板](docs/AI_PROMPTS.md#0-把仓库交给-ai直接复制)也已备好。
+
+```text
+请帮我使用 https://github.com/wangge-dev/ec-data-platform-open 。
+先读取 docs/AI_PROMPTS.md 的「0. 把仓库交给 AI」，按其中说明接手。
+默认先帮我安装正式版本并用合成样例验证，再按我的报表做 DIY。
+先确认你的操作能力、我的电脑环境和已有实例；没有本机工具就分步指导我。
+无法读取仓库就请我提供文档，不要猜测；不要索要密码或真实业务数据。
+```
+
+AI 可以帮你理解和操作，但不会仅凭一个仓库地址就获得电脑权限。普通业务表优先使用页面向导；复杂改造才需要完整源码。
+
 ## 先用现成模块，再按自己的报表调整
 
 项目提供订单、广告、成本、库存和字典等业务入口。已有适配关系的报表可以归入模块；字段名或文件名不同的，先确认映射与归属，再让后续同类文件复用规则。它不会保证任何报表一上传就自动识别正确。
