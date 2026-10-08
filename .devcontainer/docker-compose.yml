@@ -10,6 +10,8 @@ services:
       - ..:/workspaces/ec-data-platform:cached
     environment:
       NODE_ENV: development
+      POSTGRES_PASSWORD: codespaces_postgres_dev_only
+      APP_DB_PASSWORD: codespaces_app_dev_only
       DATABASE_URL: postgres://ec_app:codespaces_app_dev_only@postgres:5432/ec_data
       MIGRATION_DATABASE_URL: postgres://ec:codespaces_postgres_dev_only@postgres:5432/ec_data
       ADMIN_PASSWORD: codespaces_dev_admin_only
