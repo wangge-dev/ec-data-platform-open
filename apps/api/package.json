@@ -65,7 +65,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.45.2",
-    "hono": "4.13.5",
+    "hono": "4.13.13",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "3.23.1",
     "node-cron": "^4.5.0",

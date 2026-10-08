@@ -12,6 +12,7 @@ RUN corepack enable \
     && corepack prepare pnpm@9.15.9 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches/ ./patches/
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY scripts/verify-sheetjs-package.mjs ./scripts/verify-sheetjs-package.mjs

@@ -67,6 +67,9 @@ jobs:
       - name: Audit runtime and development dependencies
         run: pnpm audit:all
 
+      - name: Regress patched build dependency depth protection
+        run: pnpm test:dependency-security
+
       - name: Prepare isolated PostgreSQL integration database
         shell: bash
         env:

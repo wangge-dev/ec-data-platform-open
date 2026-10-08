@@ -27,6 +27,7 @@
 - 不对真实数据库运行需要写入的测试；数据库集成测试必须使用独立 `TEST_DATABASE_URL` 或隔离 Compose 项目。
 - 不执行 `docker compose down -v`，除非用户明确授权删除对应实例的数据卷。
 - SQL 值参数化；动态标识符必须走项目安全引用工具；应用运行时使用非超级用户 `ec_app`。
+- 依赖审计运行 `pnpm audit:all` 和 `pnpm audit:prod`；唯一允许的本地补丁处理规则是 `docs/DEPENDENCY_SECURITY_2026-10-08.md` 所述 braces 构建链告警，必须保留原始扫描计数与实时回归验证。不得扩展忽略列表或把原始扫描仍有告警写成“零告警”。
 - 内置复杂模块可用 JSON/transform；普通业务优先使用 UI“新建模块”，不要要求用户改代码。
 
 ## 发布与换机

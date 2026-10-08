@@ -9,6 +9,7 @@
 | 认识产品、日常上传与看结果 | [给人看的使用手册](USER_GUIDE.md) |
 | 从源码用 Docker 安装或升级 | [部署指南](部署指南.md) |
 | 看技术实现、开发与交付边界 | [技术与交付说明](TECHNICAL_OVERVIEW.md) |
+| 看 2026-10-08 依赖修复与单项补丁规则 | [依赖安全修复说明](DEPENDENCY_SECURITY_2026-10-08.md) |
 | 用 Release 离线包在电脑上安装 | [离线包使用说明](离线包使用说明.md) |
 | 四步创建普通业务模块 | [自助创建业务模块](SELF_SERVICE_MODULES.md) |
 | 用 AI 辅助 DIY，但不泄露业务数据 | [AI 接手与 DIY 指南](AI_DIY_GUIDE.md)、[可复制提示词](AI_PROMPTS.md) |
