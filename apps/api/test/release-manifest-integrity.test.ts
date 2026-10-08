@@ -37,6 +37,8 @@ const toGitBashPath = (path: string): string =>
 const toHostBashPath = (path: string): string => process.platform === "win32" ? toGitBashPath(path) : path;
 
 const releaseDocAllowlist = [
+  "GETTING_STARTED.md",
+  "DEPENDENCY_SECURITY_2026-10-08.md",
   "DIY_SEMANTIC_EXTENSIONS.md",
   "USER_GUIDE.md",
   "AI_DIY_GUIDE.md",
@@ -104,6 +106,13 @@ const findFiles = (directory: string, suffix: string): string[] =>
   });
 
 describe("release manifest and prebuilt archive integrity", () => {
+  test("minimal source fixtures contain the real Bash package documentation set", () => {
+    const declaration = readRoot("scripts/package-release.sh").match(/RELEASE_DOCS=\(([\s\S]*?)\n\)/)?.[1];
+    expect(declaration).toBeDefined();
+    const actual = [...declaration!.matchAll(/"([^"]+\.md)"/g)].map((match) => match[1]);
+    expect([...releaseDocAllowlist].sort()).toEqual(actual.sort());
+  });
+
   test("supports one prebuilt image archive with canonical provenance and records file hashes", () => {
     const windowsPackager = readRoot("scripts/package-release.ps1");
     const bashPackager = readRoot("scripts/package-release.sh");

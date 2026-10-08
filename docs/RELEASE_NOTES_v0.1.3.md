@@ -1,12 +1,14 @@
-# v0.1.2：依赖修复与完整下载导航
+# v0.1.3：依赖修复与完整下载导航
 
 本版重建 API/Web 运行镜像及离线包，不覆盖 v0.1.1，不改变已有用户的业务数据库。正式 Release 仅在流水线的隔离验收通过后发布。
+
+v0.1.2 标签保留作为失败记录：新增包内文档后，Linux 打包测试夹具遗漏了两份文档，正式 Release 未发布。v0.1.3 补齐夹具并增加跨平台可运行的文档集合检查，不跳过原打包验收。
 
 ## 使用者下载哪一个
 
 - 安装平台：Release Assets 中的 `ec-data-platform-20261008.zip`。完整解压，先读包内 `README.md` 和 `docs/GETTING_STARTED.md`，再按 `docs/USER_GUIDE.md` 配置 Docker、密码并启动。
 - `ecommerce-workbench-v1.zip` 是可选配置与合成样例，`ec-cloud-kit.zip` 是管理员服务器准备工具；都不是平台安装包。
-- `Source code (zip)` 是开发源码，不是离线安装包。复杂 DIY 使用 v0.1.2 标签源码及 `AI_DIY_GUIDE.md`、`AI_PROMPTS.md`。
+- `Source code (zip)` 是开发源码，不是离线安装包。复杂 DIY 使用 v0.1.3 标签源码及 `AI_DIY_GUIDE.md`、`AI_PROMPTS.md`。
 - 已有实例先备份并按手册升级；不要从新目录随意启动第二套空数据库。本次发布不自动升级本地实例。
 
 ## 本版变化
