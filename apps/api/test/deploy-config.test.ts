@@ -634,12 +634,13 @@ finally { Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue }
     const result = spawnSync(
       hostPowerShell,
       ["-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded],
-      { encoding: "utf8" },
+      { encoding: "utf8", timeout: 20_000 },
     );
     const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
     expect(result.status, output).toBe(0);
     expect(output).toContain("DOTNET_SHA256_OK");
-  });
+    // Hosted Linux pwsh cold-start can exceed Vitest's default 5-second budget.
+  }, 30_000);
 
   windowsTest("accepts a successful one-shot migration and still waits for API and Web health", () => {
     const sourceRoot = mkdtempSync(join(tmpdir(), "ec-launcher-source-"));
