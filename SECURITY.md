@@ -2,6 +2,14 @@
 
 This repository is intended for public source distribution under GNU GPL-3.0-only. Public source visibility does not make a deployment safe for anonymous access or untrusted multi-tenant use.
 
+## Dependency review status (2026-10-08)
+
+The documentation update triggered [CI run 37749193441](https://github.com/wangge-dev/ec-data-platform-open/actions/runs/37749193441), which failed at the existing dependency audit step. A local scan with the project's pinned pnpm reproduced 16 advisories: 9 high and 7 moderate, affecting Axios, Hono, braces, source-map-js, and postcss-selector-parser.
+
+These are dependency-version findings across runtime and development dependencies; exploitability through this application's actual paths has not yet been assessed. Several Axios advisories concern Node adapters, whereas this project's direct Axios dependency is in the web app. Passing unit tests does not clear these findings. Dependency remediation, application-path review, and a new validated release remain outstanding; do not present the current release as having passed a current security audit or promote it for public production deployment.
+
+The existing `v0.1.1` assets have not been replaced. Documentation-only updates do not patch the dependencies embedded in those images. Retain the audit checks rather than bypassing them to make CI green.
+
 ## Sensitive material
 
 Never commit or upload:
