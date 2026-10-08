@@ -22,6 +22,8 @@ const windowsBashTest = process.platform === "win32" &&
   ? test
   : test.skip;
 const releaseDocAllowlist = [
+  "GETTING_STARTED.md",
+  "DEPENDENCY_SECURITY_2026-10-08.md",
   "HOW_TO_ADD_MODULE.md",
   "HOW_TO_ADD_PLATFORM.md",
   "SELF_SERVICE_MODULES.md",

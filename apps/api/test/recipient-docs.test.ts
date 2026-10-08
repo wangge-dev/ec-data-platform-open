@@ -3,7 +3,8 @@ import { resolve, dirname } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 const root = resolve(import.meta.dirname, '../../..');
-const guides = ['USER_GUIDE.md', 'AI_DIY_GUIDE.md', 'AI_PROMPTS.md'];
+const guides = ['GETTING_STARTED.md', 'USER_GUIDE.md', 'AI_DIY_GUIDE.md', 'AI_PROMPTS.md',
+  'DEPENDENCY_SECURITY_2026-10-08.md'];
 describe('recipient documentation', () => {
   test('both packagers expose human, AI and prompt entry points', () => {
     for (const packager of ['scripts/package-release.ps1', 'scripts/package-release.sh']) {

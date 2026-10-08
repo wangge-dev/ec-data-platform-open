@@ -31,6 +31,8 @@ if [ "$SKIP_IMAGE_EXPORT" -eq 1 ] && { [ -n "$PREBUILT_IMAGE_ARCHIVE" ] || [ -n 
 fi
 
 RELEASE_DOCS=(
+  "GETTING_STARTED.md"
+  "DEPENDENCY_SECURITY_2026-10-08.md"
   "HOW_TO_ADD_MODULE.md"
   "HOW_TO_ADD_PLATFORM.md"
   "SELF_SERVICE_MODULES.md"
@@ -500,6 +502,8 @@ cat > "${DIST_PATH}/README.md" <<'EOF'
 
 ## 先看这里：按读者分开
 
+- 第一次下载：[从 GitHub 下载与首次启动](docs/GETTING_STARTED.md)。
+- 本版依赖修复与限制：[依赖安全说明](docs/DEPENDENCY_SECURITY_2026-10-08.md)。
 - 给人看：[安装与使用手册](docs/USER_GUIDE.md)。新手先读这一份。
 - 给开发 AI 看：[接手与 DIY 说明](docs/AI_DIY_GUIDE.md)。不是平台内业务 AI 的系统提示词。
 - 复制给 AI：[任务提示词](docs/AI_PROMPTS.md)。按需填写，不附秘密或真实数据库。

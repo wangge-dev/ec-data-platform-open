@@ -18,6 +18,8 @@ $humanModuleGuideName = (-join @([char]0x52A0, [char]0x6A21, [char]0x5757)) + '_
 $deploymentGuideName = (-join @([char]0x90E8, [char]0x7F72, [char]0x6307, [char]0x5357)) + '.md'
 $offlineGuideName = (-join @([char]0x79BB, [char]0x7EBF, [char]0x5305, [char]0x4F7F, [char]0x7528, [char]0x8BF4, [char]0x660E)) + '.md'
 $releaseDocNames = @(
+  'GETTING_STARTED.md',
+  'DEPENDENCY_SECURITY_2026-10-08.md',
   'HOW_TO_ADD_MODULE.md',
   'HOW_TO_ADD_PLATFORM.md',
   'SELF_SERVICE_MODULES.md',
@@ -505,6 +507,8 @@ try {
 
 ## Start here: choose your reader
 
+- First download: [GitHub download and first startup](docs/GETTING_STARTED.md).
+- Dependency fixes and limitations: [Dependency security report](docs/DEPENDENCY_SECURITY_2026-10-08.md).
 - Human users: [Installation and usage manual](docs/USER_GUIDE.md).
 - Development AI: [Handoff and DIY guide](docs/AI_DIY_GUIDE.md).
 - Copyable AI task prompts: [Prompt collection](docs/AI_PROMPTS.md).

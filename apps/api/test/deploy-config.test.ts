@@ -47,6 +47,8 @@ const releaseFileRecord = (releaseRoot: string, relative: string) => {
 const releaseFileRecords = (releaseRoot: string, relatives: string[]) =>
   relatives.map((relative) => releaseFileRecord(releaseRoot, relative)).sort((a, b) => Buffer.from(a.path).compare(Buffer.from(b.path)));
 const releaseDocAllowlist = [
+  "GETTING_STARTED.md",
+  "DEPENDENCY_SECURITY_2026-10-08.md",
   "HOW_TO_ADD_MODULE.md",
   "HOW_TO_ADD_PLATFORM.md",
   "SELF_SERVICE_MODULES.md",
