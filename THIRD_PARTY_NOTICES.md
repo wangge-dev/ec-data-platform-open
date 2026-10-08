@@ -8,7 +8,7 @@ The dependency inventory for the lockfile in this release was generated with `co
 |---|---|---|
 | SheetJS Community Edition (`xlsx` 0.20.3, pinned CDN tarball) | Apache-2.0 | <https://sheetjs.com/> |
 | `caniuse-lite` browser-compatibility data | CC-BY-4.0 | <https://github.com/browserslist/caniuse-lite> |
-| `braces` 3.0.3 local depth-protection patch (build dependency) | MIT; upstream notice preserved in [patches/braces.LICENSE](patches/braces.LICENSE) | <https://github.com/micromatch/braces>; modification and validation described in [dependency remediation](docs/DEPENDENCY_SECURITY_2026-10-08.md) |
+| `braces` 3.0.3 local depth-protection patch (build dependency) | MIT; upstream notice preserved in [source patch license](https://github.com/wangge-dev/ec-data-platform-open/blob/main/patches/braces.LICENSE) | <https://github.com/micromatch/braces>; modification and validation described in [dependency remediation](https://github.com/wangge-dev/ec-data-platform-open/blob/main/docs/DEPENDENCY_SECURITY_2026-10-08.md) |
 | PostgreSQL 16 and Redis 7 Alpine base images | Upstream image/component licenses | <https://hub.docker.com/_/postgres>, <https://hub.docker.com/_/redis> |
 
 The seven workbench spreadsheets under `templates/ecommerce-workbench/samples/` are fixed synthetic examples. The front-profit spreadsheets under `templates/front-profit/` are empty/formula templates, not customer exports. Their provenance and checks are described in the template directories. No real customer, order or financial export is licensed for redistribution by this repository.
